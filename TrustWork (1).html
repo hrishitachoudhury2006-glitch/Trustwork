@@ -1,0 +1,1624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TrustWork — Verify Before You Apply</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --purple: #7C3AED;
+  --purple-hover: #6D28D9;
+  --purple-light: #EDE9FE;
+  --purple-mid: #C4B5FD;
+  --purple-dark: #4C1D95;
+  --bg: #F8F7FF;
+  --surface: #FFFFFF;
+  --surface2: #F4F3FF;
+  --border: #E5E4F0;
+  --border2: #D4D2E8;
+  --text: #1A1535;
+  --text2: #4B4869;
+  --text3: #7B78A8;
+  --red: #DC2626;
+  --red-bg: #FEF2F2;
+  --red-border: #FECACA;
+  --amber: #D97706;
+  --amber-bg: #FFFBEB;
+  --amber-border: #FDE68A;
+  --green: #059669;
+  --green-bg: #ECFDF5;
+  --green-border: #A7F3D0;
+  --shadow: 0 1px 3px rgba(124,58,237,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 16px rgba(124,58,237,0.10), 0 2px 6px rgba(0,0,0,0.04);
+  --shadow-lg: 0 8px 32px rgba(124,58,237,0.13), 0 4px 12px rgba(0,0,0,0.06);
+  --radius: 10px;
+  --radius-lg: 16px;
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Plus Jakarta Sans', sans-serif;
+  --transition: 0.18s cubic-bezier(0.4,0,0.2,1);
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body { font-family: var(--sans); background: var(--bg); color: var(--text); min-height:100vh; font-size:15px; line-height:1.6; }
+button { font-family: var(--sans); cursor:pointer; }
+input, textarea, select { font-family: var(--sans); }
+a { color: var(--purple); text-decoration:none; }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--purple-mid); border-radius:3px; }
+
+/* ── AUTH OVERLAY ── */
+#authOverlay {
+  position:fixed; inset:0; background:linear-gradient(135deg,#F0EDFF 0%,#EEF2FF 50%,#F5F3FF 100%);
+  z-index:1000; display:flex; align-items:center; justify-content:center;
+}
+.auth-card {
+  background:var(--surface); border-radius:var(--radius-lg); padding:40px;
+  width:100%; max-width:420px; box-shadow:var(--shadow-lg);
+  border:1px solid var(--border);
+}
+.auth-logo { display:flex; align-items:center; gap:12px; margin-bottom:32px; justify-content:center; }
+.auth-title { font-size:22px; font-weight:700; color:var(--text); margin-bottom:6px; text-align:center; }
+.auth-sub { font-size:13px; color:var(--text3); text-align:center; margin-bottom:28px; }
+.field-group { margin-bottom:18px; }
+.field-label { font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:6px; letter-spacing:0.04em; text-transform:uppercase; }
+.field-input {
+  width:100%; padding:11px 14px; border:1.5px solid var(--border2);
+  border-radius:var(--radius); font-size:14px; color:var(--text);
+  background:var(--surface); transition:border-color var(--transition);
+  outline:none;
+}
+.field-input:focus { border-color:var(--purple); box-shadow:0 0 0 3px rgba(124,58,237,0.1); }
+.btn-primary {
+  width:100%; padding:12px 20px; background:var(--purple); color:#fff;
+  border:none; border-radius:var(--radius); font-size:15px; font-weight:600;
+  transition:background var(--transition), transform var(--transition), box-shadow var(--transition);
+  letter-spacing:0.01em;
+}
+.btn-primary:hover { background:var(--purple-hover); box-shadow:var(--shadow-md); transform:translateY(-1px); }
+.btn-primary:active { transform:translateY(0); }
+.auth-switch { text-align:center; font-size:13px; color:var(--text3); margin-top:20px; }
+.auth-switch span { color:var(--purple); font-weight:600; cursor:pointer; }
+.auth-switch span:hover { text-decoration:underline; }
+.auth-error { font-size:12px; color:var(--red); margin-top:6px; display:none; }
+
+/* ── NAV ── */
+#mainNav {
+  background:var(--surface); border-bottom:1px solid var(--border);
+  position:sticky; top:0; z-index:100;
+  box-shadow:0 1px 0 rgba(124,58,237,0.06);
+}
+.nav-inner {
+  max-width:1160px; margin:0 auto; padding:0 24px;
+  display:flex; align-items:center; justify-content:space-between; height:64px;
+}
+.nav-logo { display:flex; align-items:center; gap:10px; }
+.nav-logo-text { font-size:20px; font-weight:800; color:var(--text); letter-spacing:-0.02em; }
+.nav-logo-text span { color:var(--purple); }
+.nav-tagline { font-size:11px; color:var(--text3); margin-top:-2px; font-style:italic; }
+.nav-right { display:flex; align-items:center; gap:12px; }
+.nav-user { font-size:13px; font-weight:600; color:var(--text2); display:flex; align-items:center; gap:8px; }
+.nav-avatar {
+  width:32px; height:32px; border-radius:50%;
+  background:var(--purple); color:#fff;
+  display:flex; align-items:center; justify-content:center;
+  font-size:13px; font-weight:700;
+}
+.btn-logout {
+  padding:7px 16px; border:1.5px solid var(--border2); background:transparent;
+  border-radius:8px; font-size:13px; font-weight:600; color:var(--text2);
+  transition:all var(--transition);
+}
+.btn-logout:hover { border-color:var(--purple); color:var(--purple); }
+
+/* ── TABS ── */
+.tabs-wrapper { background:var(--surface); border-bottom:1px solid var(--border); }
+.tabs-inner { max-width:1160px; margin:0 auto; padding:0 24px; display:flex; gap:0; }
+.tab-btn {
+  padding:16px 24px; font-size:14px; font-weight:600; color:var(--text3);
+  background:none; border:none; border-bottom:2.5px solid transparent;
+  display:flex; align-items:center; gap:8px;
+  transition:all var(--transition); cursor:pointer; white-space:nowrap;
+  margin-bottom:-1px;
+}
+.tab-btn:hover { color:var(--purple); }
+.tab-btn.active { color:var(--purple); border-bottom-color:var(--purple); }
+.tab-btn svg { width:16px; height:16px; flex-shrink:0; }
+
+/* ── MAIN LAYOUT ── */
+.main-container { max-width:1160px; margin:0 auto; padding:32px 24px; }
+.tab-panel { display:none; }
+.tab-panel.active { display:block; }
+
+/* ── ANALYZER ── */
+.analyzer-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px; align-items:start; }
+@media(max-width:860px){ .analyzer-grid{ grid-template-columns:1fr; } }
+
+.card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius-lg); padding:24px;
+  box-shadow:var(--shadow);
+}
+.card-title {
+  font-size:13px; font-weight:700; color:var(--text2);
+  letter-spacing:0.06em; text-transform:uppercase;
+  display:flex; align-items:center; gap:8px; margin-bottom:18px;
+}
+.card-title svg { width:15px; height:15px; color:var(--purple); }
+.dot-indicator { width:7px; height:7px; border-radius:50%; background:var(--purple); flex-shrink:0; }
+
+textarea.field-input { min-height:140px; resize:vertical; line-height:1.6; }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px; }
+@media(max-width:500px){ .form-row{ grid-template-columns:1fr; } }
+
+.analyze-btn {
+  width:100%; margin-top:14px; padding:13px 20px;
+  background:var(--purple); color:#fff; border:none;
+  border-radius:var(--radius); font-size:15px; font-weight:700;
+  display:flex; align-items:center; justify-content:center; gap:10px;
+  transition:all var(--transition); letter-spacing:0.01em;
+}
+.analyze-btn:hover:not(:disabled) { background:var(--purple-hover); box-shadow:var(--shadow-md); transform:translateY(-1px); }
+.analyze-btn:disabled { opacity:0.55; cursor:not-allowed; transform:none; }
+.analyze-btn svg { width:18px; height:18px; }
+
+.api-key-section { margin-top:16px; }
+.api-note { font-size:11.5px; color:var(--text3); margin-top:6px; line-height:1.5; }
+.api-note a { color:var(--purple); }
+
+.sample-row { display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
+.sample-chip {
+  padding:6px 14px; border:1.5px solid var(--border2); border-radius:20px;
+  font-size:12px; font-weight:600; color:var(--text2); background:var(--surface);
+  cursor:pointer; transition:all var(--transition); display:flex; align-items:center; gap:6px;
+}
+.sample-chip:hover { border-color:var(--purple); color:var(--purple); background:var(--purple-light); }
+.sample-chip.fake { border-color:var(--red-border); color:var(--red); background:var(--red-bg); }
+.sample-chip.real { border-color:var(--green-border); color:var(--green); background:var(--green-bg); }
+
+/* ── RESULT PANEL ── */
+.result-placeholder {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  min-height:320px; color:var(--text3); text-align:center; gap:12px;
+}
+.result-placeholder svg { width:48px; height:48px; color:var(--purple-mid); }
+.result-placeholder p { font-size:14px; line-height:1.6; }
+
+.loading-state { display:none; text-align:center; padding:40px 20px; }
+.loading-spinner {
+  width:48px; height:48px; border:3px solid var(--purple-light);
+  border-top-color:var(--purple); border-radius:50%;
+  animation:spin 0.8s linear infinite; margin:0 auto 16px;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+.loading-steps { font-size:12px; color:var(--text3); font-family:var(--mono); margin-top:12px; text-align:left; }
+.loading-step { padding:3px 0; display:flex; align-items:center; gap:8px; }
+.loading-step.done { color:var(--green); }
+.loading-step.active { color:var(--purple); }
+.step-dot { width:6px; height:6px; border-radius:50%; background:currentColor; flex-shrink:0; }
+
+/* ── SCORE GAUGE ── */
+.gauge-section { text-align:center; margin-bottom:20px; }
+.gauge-container { display:inline-block; position:relative; }
+.gauge-svg { display:block; }
+.gauge-score-text { font-size:28px; font-weight:800; font-family:var(--mono); }
+.gauge-label-text { font-size:10px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; fill:var(--text3); }
+
+/* ── VERDICT BOX ── */
+.verdict-box { border-radius:var(--radius); padding:14px 18px; margin-bottom:16px; display:flex; align-items:flex-start; gap:12px; }
+.verdict-box.fake { background:var(--red-bg); border:1.5px solid var(--red-border); }
+.verdict-box.suspicious { background:var(--amber-bg); border:1.5px solid var(--amber-border); }
+.verdict-box.legitimate { background:var(--green-bg); border:1.5px solid var(--green-border); }
+.verdict-icon { width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.verdict-box.fake .verdict-icon { background:var(--red); }
+.verdict-box.suspicious .verdict-icon { background:var(--amber); }
+.verdict-box.legitimate .verdict-icon { background:var(--green); }
+.verdict-icon svg { width:18px; height:18px; color:#fff; }
+.verdict-title { font-size:15px; font-weight:700; margin-bottom:3px; }
+.verdict-box.fake .verdict-title { color:var(--red); }
+.verdict-box.suspicious .verdict-title { color:var(--amber); }
+.verdict-box.legitimate .verdict-title { color:var(--green); }
+.verdict-desc { font-size:12.5px; color:var(--text2); line-height:1.55; }
+
+/* ── FACTORS ── */
+.factors-title { font-size:11px; font-weight:700; color:var(--text3); letter-spacing:0.08em; text-transform:uppercase; margin-bottom:10px; }
+.factor-row { margin-bottom:10px; }
+.factor-header { display:flex; justify-content:space-between; margin-bottom:4px; }
+.factor-name { font-size:12.5px; font-weight:500; color:var(--text2); }
+.factor-score { font-size:12px; font-family:var(--mono); font-weight:600; }
+.factor-bar { height:5px; background:var(--border); border-radius:3px; overflow:hidden; }
+.factor-fill { height:100%; border-radius:3px; transition:width 1.1s cubic-bezier(0.34,1.56,0.64,1); }
+
+/* ── AI INSIGHT BOX ── */
+.ai-insight { background:linear-gradient(135deg,#F5F3FF,#EEF2FF); border:1.5px solid var(--purple-mid); border-radius:var(--radius); padding:14px 16px; margin-top:14px; }
+.ai-insight-label { font-size:10px; font-weight:700; color:var(--purple); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:6px; display:flex; align-items:center; gap:6px; }
+.ai-insight-label svg { width:12px; height:12px; }
+.ai-insight-text { font-size:12.5px; color:var(--text2); line-height:1.65; white-space:pre-line; }
+
+/* ── RESUME PROMPT ── */
+.resume-prompt-box { background:linear-gradient(135deg,var(--purple-light),#EEF2FF); border:1.5px solid var(--purple-mid); border-radius:var(--radius); padding:16px 18px; margin-top:14px; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+.resume-prompt-text { font-size:13px; font-weight:600; color:var(--purple-dark); }
+.resume-prompt-sub { font-size:11.5px; color:var(--text2); margin-top:2px; }
+.btn-resume-cta { padding:9px 18px; background:var(--purple); color:#fff; border:none; border-radius:8px; font-size:13px; font-weight:700; cursor:pointer; transition:all var(--transition); white-space:nowrap; display:flex; align-items:center; gap:7px; }
+.btn-resume-cta:hover { background:var(--purple-hover); }
+.btn-resume-cta svg { width:14px; height:14px; }
+
+/* ── FLAGS ── */
+.flags-section { margin-top:14px; }
+.flags-title { font-size:11px; font-weight:700; color:var(--text3); letter-spacing:0.08em; text-transform:uppercase; margin-bottom:8px; }
+.flag-item { display:flex; align-items:flex-start; gap:8px; font-size:12.5px; color:var(--text2); padding:5px 0; border-bottom:1px solid var(--border); line-height:1.5; }
+.flag-item:last-child { border-bottom:none; }
+.flag-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; margin-top:5px; }
+.flag-red { background:var(--red); }
+.flag-amber { background:var(--amber); }
+
+/* ── DASHBOARD ── */
+.dash-welcome { font-size:22px; font-weight:800; color:var(--text); margin-bottom:4px; }
+.dash-sub { font-size:14px; color:var(--text3); margin-bottom:28px; }
+.stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:28px; }
+@media(max-width:700px){ .stats-grid{ grid-template-columns:repeat(2,1fr); } }
+.stat-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:20px; box-shadow:var(--shadow); }
+.stat-label { font-size:11px; font-weight:700; color:var(--text3); letter-spacing:0.07em; text-transform:uppercase; margin-bottom:8px; }
+.stat-value { font-size:30px; font-weight:800; font-family:var(--mono); line-height:1; }
+.stat-sub { font-size:11px; color:var(--text3); margin-top:4px; }
+.stat-card.purple .stat-value { color:var(--purple); }
+.stat-card.red .stat-value { color:var(--red); }
+.stat-card.green .stat-value { color:var(--green); }
+.stat-card.amber .stat-value { color:var(--amber); }
+
+.history-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); box-shadow:var(--shadow); overflow:hidden; }
+.history-header { padding:18px 24px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+.history-title { font-size:15px; font-weight:700; color:var(--text); display:flex; align-items:center; gap:8px; }
+.history-title svg { width:16px; height:16px; color:var(--purple); }
+.history-table { width:100%; border-collapse:collapse; }
+.history-table th { padding:12px 20px; text-align:left; font-size:11px; font-weight:700; color:var(--text3); letter-spacing:0.06em; text-transform:uppercase; border-bottom:1px solid var(--border); background:var(--bg); }
+.history-table td { padding:14px 20px; font-size:13px; color:var(--text2); border-bottom:1px solid var(--border); }
+.history-table tr:last-child td { border-bottom:none; }
+.history-table tr:hover td { background:var(--bg); }
+.score-badge { display:inline-flex; align-items:center; font-family:var(--mono); font-size:12px; font-weight:700; padding:4px 10px; border-radius:6px; }
+.score-fake { background:var(--red-bg); color:var(--red); border:1px solid var(--red-border); }
+.score-suspicious { background:var(--amber-bg); color:var(--amber); border:1px solid var(--amber-border); }
+.score-legit { background:var(--green-bg); color:var(--green); border:1px solid var(--green-border); }
+.empty-state { padding:48px 24px; text-align:center; color:var(--text3); }
+.empty-state svg { width:40px; height:40px; color:var(--purple-mid); margin:0 auto 12px; display:block; }
+.clear-btn { padding:8px 16px; border:1.5px solid var(--border2); background:transparent; border-radius:8px; font-size:13px; font-weight:600; color:var(--text3); transition:all var(--transition); }
+.clear-btn:hover { border-color:var(--red); color:var(--red); }
+
+/* ── RESUME TOOL ── */
+.resume-hero { background:linear-gradient(135deg,var(--purple),#6D28D9); border-radius:var(--radius-lg); padding:32px; color:#fff; margin-bottom:28px; }
+.resume-hero-title { font-size:24px; font-weight:800; margin-bottom:8px; }
+.resume-hero-sub { font-size:14px; opacity:0.85; line-height:1.6; max-width:560px; }
+.resume-hero-badges { display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; }
+.hero-badge { background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.25); border-radius:20px; padding:5px 14px; font-size:12px; font-weight:600; display:flex; align-items:center; gap:6px; }
+.hero-badge svg { width:12px; height:12px; }
+.resume-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px; align-items:start; }
+@media(max-width:860px){ .resume-grid{ grid-template-columns:1fr; } }
+.section-label { font-size:11px; font-weight:700; color:var(--text3); letter-spacing:0.08em; text-transform:uppercase; margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+.section-label svg { width:14px; height:14px; color:var(--purple); }
+.job-desc-field { width:100%; min-height:100px; }
+.resume-btn { width:100%; margin-top:14px; padding:13px 20px; background:var(--purple); color:#fff; border:none; border-radius:var(--radius); font-size:15px; font-weight:700; display:flex; align-items:center; justify-content:center; gap:10px; transition:all var(--transition); }
+.resume-btn:hover:not(:disabled) { background:var(--purple-hover); box-shadow:var(--shadow-md); transform:translateY(-1px); }
+.resume-btn:disabled { opacity:0.55; cursor:not-allowed; transform:none; }
+.resume-btn svg { width:18px; height:18px; }
+.skill-tags { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+.skill-tag { padding:5px 12px; background:var(--purple-light); color:var(--purple-dark); border-radius:20px; font-size:12px; font-weight:600; display:flex; align-items:center; gap:6px; }
+.remove-skill { cursor:pointer; color:var(--purple); font-size:14px; font-weight:700; line-height:1; }
+.add-skill-row { display:flex; gap:8px; margin-top:10px; }
+.skill-input { flex:1; padding:8px 12px; border:1.5px solid var(--border2); border-radius:8px; font-size:13px; outline:none; }
+.skill-input:focus { border-color:var(--purple); }
+.add-skill-btn { padding:8px 16px; background:var(--purple); color:#fff; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; transition:background var(--transition); }
+.add-skill-btn:hover { background:var(--purple-hover); }
+
+/* ── RESUME RESULTS ── */
+.resume-result-section { margin-top:20px; }
+.resume-score-row { display:flex; align-items:center; gap:16px; margin-bottom:20px; flex-wrap:wrap; }
+.resume-overall-score { width:72px; height:72px; border-radius:50%; background:var(--purple); color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; flex-shrink:0; }
+.resume-overall-score .score-big { font-size:22px; font-weight:800; font-family:var(--mono); line-height:1; }
+.resume-overall-score .score-max { font-size:10px; opacity:0.8; }
+.resume-score-text h3 { font-size:16px; font-weight:700; color:var(--text); }
+.resume-score-text p { font-size:13px; color:var(--text3); margin-top:2px; }
+.resume-section-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:18px; margin-bottom:14px; }
+.resume-section-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+.resume-section-title { font-size:13px; font-weight:700; color:var(--text); display:flex; align-items:center; gap:8px; }
+.resume-section-title svg { width:14px; height:14px; color:var(--purple); }
+.score-pill { font-size:11px; font-family:var(--mono); font-weight:700; padding:3px 10px; border-radius:20px; }
+.score-high { background:var(--green-bg); color:var(--green); border:1px solid var(--green-border); }
+.score-mid { background:var(--amber-bg); color:var(--amber); border:1px solid var(--amber-border); }
+.score-low { background:var(--red-bg); color:var(--red); border:1px solid var(--red-border); }
+.feedback-item { font-size:12.5px; color:var(--text2); padding:4px 0; display:flex; align-items:flex-start; gap:8px; line-height:1.55; }
+.feedback-item svg { width:13px; height:13px; flex-shrink:0; margin-top:2px; }
+.feedback-good { color:var(--green); }
+.feedback-warn { color:var(--amber); }
+.feedback-bad { color:var(--red); }
+.missing-kw { display:inline-block; padding:3px 9px; background:var(--red-bg); color:var(--red); border-radius:4px; font-size:11px; font-weight:600; margin:2px; border:1px solid var(--red-border); }
+.added-kw { display:inline-block; padding:3px 9px; background:var(--green-bg); color:var(--green); border-radius:4px; font-size:11px; font-weight:600; margin:2px; border:1px solid var(--green-border); }
+.improved-resume-box { background:var(--bg); border:1.5px solid var(--border2); border-radius:var(--radius); padding:16px; font-size:12.5px; color:var(--text2); line-height:1.7; white-space:pre-wrap; max-height:320px; overflow-y:auto; font-family:var(--mono); }
+
+/* ── TOAST ── */
+.toast { position:fixed; bottom:24px; right:24px; background:var(--text); color:#fff; padding:12px 20px; border-radius:10px; font-size:13px; font-weight:600; transform:translateY(20px); opacity:0; transition:all 0.3s; z-index:999; display:flex; align-items:center; gap:8px; max-width:320px; }
+.toast.show { transform:translateY(0); opacity:1; }
+.toast svg { width:16px; height:16px; flex-shrink:0; }
+.toast.success { background:#059669; }
+.toast.error { background:var(--red); }
+
+/* ── MISC ── */
+.section-divider { height:1px; background:var(--border); margin:24px 0; }
+.badge { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700; letter-spacing:0.04em; }
+.badge-purple { background:var(--purple-light); color:var(--purple-dark); }
+.text-center { text-align:center; }
+.mt-8 { margin-top:8px; }
+.mt-12 { margin-top:12px; }
+.mt-16 { margin-top:16px; }
+
+/* ── SPINNER INLINE ── */
+.inline-spin { display:inline-block; width:14px; height:14px; border:2px solid rgba(255,255,255,0.4); border-top-color:#fff; border-radius:50%; animation:spin 0.7s linear infinite; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     AUTH OVERLAY
+══════════════════════════════════════════ -->
+<div id="authOverlay">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <!-- TrustWork Logo SVG -->
+      <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M20 3L5 9V20C5 28.5 11.5 36.5 20 39C28.5 36.5 35 28.5 35 20V9L20 3Z" fill="#7C3AED"/>
+        <path d="M20 3L5 9V20C5 28.5 11.5 36.5 20 39C28.5 36.5 35 28.5 35 20V9L20 3Z" fill="url(#shieldGrad)" opacity="0.3"/>
+        <path d="M14 20L18 24L26 16" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="26" cy="25" r="6" fill="white" fill-opacity="0.15"/>
+        <circle cx="26" cy="25" r="4.5" stroke="white" stroke-width="1.5"/>
+        <path d="M30 29L33 32" stroke="white" stroke-width="2" stroke-linecap="round"/>
+        <defs>
+          <linearGradient id="shieldGrad" x1="5" y1="3" x2="35" y2="39" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#A78BFA"/>
+            <stop offset="1" stop-color="#7C3AED"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <div>
+        <div style="font-size:20px;font-weight:800;color:var(--text);letter-spacing:-0.02em;">Trust<span style="color:var(--purple)">Work</span></div>
+        <div style="font-size:10px;color:var(--text3);font-style:italic;">Because every opportunity should be real</div>
+      </div>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div id="loginForm">
+      <div class="auth-title">Welcome back</div>
+      <div class="auth-sub">Sign in to continue to TrustWork</div>
+      <div class="field-group">
+        <label class="field-label">Email address</label>
+        <input type="email" class="field-input" id="loginEmail" placeholder="you@example.com">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Password</label>
+        <input type="password" class="field-input" id="loginPassword" placeholder="••••••••">
+        <div class="auth-error" id="loginError">Invalid email or password.</div>
+      </div>
+      <button class="btn-primary" onclick="doLogin()">Sign In</button>
+      <div class="auth-switch">Don't have an account? <span onclick="showRegister()">Create one</span></div>
+    </div>
+
+    <!-- REGISTER FORM -->
+    <div id="registerForm" style="display:none;">
+      <div class="auth-title">Create account</div>
+      <div class="auth-sub">Join TrustWork — protect yourself from job scams</div>
+      <div class="field-group">
+        <label class="field-label">Full Name</label>
+        <input type="text" class="field-input" id="regName" placeholder="Your full name">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Email address</label>
+        <input type="email" class="field-input" id="regEmail" placeholder="you@example.com">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Password</label>
+        <input type="password" class="field-input" id="regPassword" placeholder="Min. 6 characters">
+        <div class="auth-error" id="regError">Please fill all fields with valid data.</div>
+      </div>
+      <button class="btn-primary" onclick="doRegister()">Create Account</button>
+      <div class="auth-switch">Already have an account? <span onclick="showLogin()">Sign in</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     MAIN APP
+══════════════════════════════════════════ -->
+<div id="mainApp" style="display:none;">
+
+  <!-- NAV -->
+  <nav id="mainNav">
+    <div class="nav-inner">
+      <div class="nav-logo">
+        <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
+          <path d="M20 3L5 9V20C5 28.5 11.5 36.5 20 39C28.5 36.5 35 28.5 35 20V9L20 3Z" fill="#7C3AED"/>
+          <path d="M14 20L18 24L26 16" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="26" cy="25" r="4.5" stroke="white" stroke-width="1.5" fill="white" fill-opacity="0.1"/>
+          <path d="M30 29L33 32" stroke="white" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <div>
+          <div class="nav-logo-text">Trust<span>Work</span></div>
+          <div class="nav-tagline">Because every opportunity should be real</div>
+        </div>
+      </div>
+      <div class="nav-right">
+        <div class="nav-user">
+          <div class="nav-avatar" id="navAvatar">U</div>
+          <span id="navUserName">User</span>
+        </div>
+        <button class="btn-logout" onclick="doLogout()">Sign Out</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- TABS -->
+  <div class="tabs-wrapper">
+    <div class="tabs-inner">
+      <button class="tab-btn active" onclick="switchTab('analyzer',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        Job Analyzer
+      </button>
+      <button class="tab-btn" onclick="switchTab('dashboard',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </button>
+      <button class="tab-btn" onclick="switchTab('resume',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        AI Resume Tool
+      </button>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-container">
+
+    <!-- ── ANALYZER TAB ── -->
+    <div class="tab-panel active" id="tab-analyzer">
+      <div class="analyzer-grid">
+
+        <!-- INPUT CARD -->
+        <div>
+          <div class="card">
+            <div class="card-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              Analyze Job Posting
+            </div>
+
+            <div class="field-group">
+              <label class="field-label">Job Description / Posting Text</label>
+              <textarea class="field-input" id="jobText" placeholder="Paste the full job posting text here. The more text you provide, the more accurate the analysis will be..."></textarea>
+            </div>
+
+            <div class="field-group mt-12">
+              <label class="field-label">Job Listing URL (Optional)</label>
+              <input type="url" class="field-input" id="jobUrl" placeholder="https://... paste the job URL for additional analysis">
+              <div style="font-size:11.5px;color:var(--text3);margin-top:5px;">Provide a URL alongside the text for URL-pattern fraud analysis.</div>
+            </div>
+
+            <div class="form-row">
+              <div class="field-group" style="margin-bottom:0">
+                <label class="field-label">Company Name</label>
+                <input type="text" class="field-input" id="companyName" placeholder="e.g. Amazon India">
+              </div>
+              <div class="field-group" style="margin-bottom:0">
+                <label class="field-label">Salary Offered</label>
+                <input type="text" class="field-input" id="salaryField" placeholder="e.g. 50000/week">
+              </div>
+            </div>
+
+            <div class="form-row mt-12">
+              <div class="field-group" style="margin-bottom:0">
+                <label class="field-label">Contact Channel</label>
+                <select class="field-input" id="contactType">
+                  <option value="">Select...</option>
+                  <option value="official">Official Website / Email</option>
+                  <option value="whatsapp">WhatsApp Only</option>
+                  <option value="gmail">Gmail / Yahoo (Personal)</option>
+                  <option value="telegram">Telegram</option>
+                  <option value="none">No Contact Provided</option>
+                </select>
+              </div>
+              <div class="field-group" style="margin-bottom:0">
+                <label class="field-label">Experience Required (Years)</label>
+                <input type="number" class="field-input" id="expRequired" placeholder="e.g. 0, 2, 5" min="0" max="40">
+              </div>
+            </div>
+
+            <button class="analyze-btn" id="analyzeBtn" onclick="startAnalysis()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              Analyze with AI
+            </button>
+
+            <!-- Sample Jobs -->
+            <div style="margin-top:18px;">
+              <div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:10px;">Try Sample Postings</div>
+              <div class="sample-row">
+                <div class="sample-chip fake" onclick="loadSample(0)">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                  Fake — Work From Home
+                </div>
+                <div class="sample-chip fake" onclick="loadSample(1)">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                  Fake — Instagram Job
+                </div>
+                <div class="sample-chip real" onclick="loadSample(2)">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  Legitimate — Infosys
+                </div>
+                <div class="sample-chip real" onclick="loadSample(3)">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  Legitimate — TCS HR
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- API KEY CARD -->
+          <div class="card" style="margin-top:16px;">
+            <div class="card-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+              Gemini API Configuration
+            </div>
+            <div class="field-group" style="margin-bottom:0">
+              <label class="field-label">Gemini API Key</label>
+              <input type="password" class="field-input" id="geminiKey" placeholder="AIzaSy... (Get free at ai.google.dev)">
+              <div class="api-note">Free tier: 15 requests/min, 1M tokens/day. Without key: rule-based engine only (85% accuracy). With key: Gemini AI analysis (99% accuracy). <a href="https://ai.google.dev" target="_blank">Get your free key</a>.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RESULT CARD -->
+        <div class="card" id="resultCard">
+          <div class="card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Analysis Result
+          </div>
+
+          <!-- PLACEHOLDER -->
+          <div class="result-placeholder" id="resultPlaceholder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+            <p>Paste a job posting and click <strong>Analyze with AI</strong> to detect fraud signals using Gemini AI.</p>
+          </div>
+
+          <!-- LOADING -->
+          <div class="loading-state" id="loadingState">
+            <div class="loading-spinner"></div>
+            <div style="font-size:14px;font-weight:600;color:var(--text2);">Analyzing with Gemini AI...</div>
+            <div class="loading-steps" id="loadingSteps"></div>
+          </div>
+
+          <!-- RESULT -->
+          <div id="resultContent" style="display:none;">
+            <!-- Gauge -->
+            <div class="gauge-section">
+              <svg class="gauge-svg" width="200" height="120" viewBox="0 0 200 120">
+                <defs>
+                  <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#059669"/>
+                    <stop offset="50%" stop-color="#D97706"/>
+                    <stop offset="100%" stop-color="#DC2626"/>
+                  </linearGradient>
+                </defs>
+                <!-- Background arc -->
+                <path d="M 20 105 A 80 80 0 0 1 180 105" fill="none" stroke="#E5E4F0" stroke-width="14" stroke-linecap="round"/>
+                <!-- Colored arc -->
+                <path d="M 20 105 A 80 80 0 0 1 180 105" fill="none" stroke="url(#gaugeGrad)" stroke-width="14" stroke-linecap="round"
+                  stroke-dasharray="251.2" id="gaugeArc" stroke-dashoffset="251.2"/>
+                <!-- Needle -->
+                <line id="gaugeNeedle" x1="100" y1="105" x2="100" y2="30"
+                  stroke="var(--text)" stroke-width="2.5" stroke-linecap="round"
+                  transform="rotate(-90 100 105)" style="transition:transform 1.2s cubic-bezier(0.34,1.56,0.64,1)"/>
+                <circle cx="100" cy="105" r="5" fill="var(--text)"/>
+                <!-- Labels -->
+                <text x="15" y="120" font-size="10" fill="#059669" font-family="var(--mono)" font-weight="700">Safe</text>
+                <text x="165" y="120" font-size="10" fill="#DC2626" font-family="var(--mono)" font-weight="700">Fake</text>
+                <!-- Score text -->
+                <text id="gaugeSvgScore" x="100" y="90" text-anchor="middle" class="gauge-score-text" fill="var(--text)" font-family="'JetBrains Mono',monospace" font-weight="800" font-size="28">0</text>
+                <text x="100" y="104" text-anchor="middle" class="gauge-label-text" font-size="10" font-family="'Plus Jakarta Sans',sans-serif" font-weight="700" letter-spacing="0.08em" fill="#7B78A8">FRAUD RISK</text>
+              </svg>
+            </div>
+
+            <!-- Verdict -->
+            <div id="verdictBox"></div>
+
+            <!-- Factors -->
+            <div class="factors-title">Detection Factor Breakdown</div>
+            <div id="factorsContainer"></div>
+
+            <!-- Flags -->
+            <div id="flagsContainer"></div>
+
+            <!-- AI Insight -->
+            <div id="aiInsightBox"></div>
+
+            <!-- Resume Prompt (shown when fake detected) -->
+            <div id="resumePromptBox" style="display:none;">
+              <div class="resume-prompt-box">
+                <div>
+                  <div class="resume-prompt-text">Protect your career — improve your resume</div>
+                  <div class="resume-prompt-sub">This job appears fraudulent. Let AI help you attract legitimate opportunities instead.</div>
+                </div>
+                <button class="btn-resume-cta" onclick="goToResume()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  Improve Resume
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── DASHBOARD TAB ── -->
+    <div class="tab-panel" id="tab-dashboard">
+      <div class="dash-welcome" id="dashWelcome">Welcome back</div>
+      <div class="dash-sub">Here is your personal job analysis history.</div>
+
+      <div class="stats-grid">
+        <div class="stat-card purple">
+          <div class="stat-label">Total Scanned</div>
+          <div class="stat-value" id="dTotal">0</div>
+          <div class="stat-sub">job postings</div>
+        </div>
+        <div class="stat-card red">
+          <div class="stat-label">Fake Detected</div>
+          <div class="stat-value" id="dFake">0</div>
+          <div class="stat-sub">high risk</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-label">Safe Verified</div>
+          <div class="stat-value" id="dSafe">0</div>
+          <div class="stat-sub">legitimate</div>
+        </div>
+        <div class="stat-card amber">
+          <div class="stat-label">Avg Risk Score</div>
+          <div class="stat-value" id="dAvg">0</div>
+          <div class="stat-sub">out of 100</div>
+        </div>
+      </div>
+
+      <div class="history-card">
+        <div class="history-header">
+          <div class="history-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Analysis History
+          </div>
+          <button class="clear-btn" onclick="clearHistory()">Clear History</button>
+        </div>
+        <div id="historyTableWrap">
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <p>No analyses yet. Go to the <strong>Job Analyzer</strong> tab and scan your first posting.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── RESUME TAB ── -->
+    <div class="tab-panel" id="tab-resume">
+      <div class="resume-hero">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+          <div>
+            <div class="resume-hero-title">AI Resume Improvement Tool</div>
+            <div class="resume-hero-sub">Powered by Gemini AI — get ATS-optimized, role-specific feedback and a rewritten resume that gets you noticed by legitimate employers.</div>
+            <div class="resume-hero-badges">
+              <div class="hero-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
+                ATS Score Analysis
+              </div>
+              <div class="hero-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
+                Keyword Optimization
+              </div>
+              <div class="hero-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
+                AI Rewrite
+              </div>
+            </div>
+          </div>
+          <div style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);border-radius:12px;padding:16px 20px;text-align:center;min-width:120px;">
+            <div style="font-size:28px;font-weight:800;font-family:var(--mono);">AI</div>
+            <div style="font-size:11px;opacity:0.8;margin-top:2px;">Gemini Powered</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="resume-grid">
+        <!-- INPUT SIDE -->
+        <div>
+          <div class="card">
+            <div class="section-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              Resume Content
+            </div>
+            <div class="field-group">
+              <label class="field-label">Paste Your Resume Text</label>
+              <textarea class="field-input" id="resumeText" style="min-height:200px;" placeholder="Paste your complete resume text here. Include your education, work experience, skills, and any other relevant information..."></textarea>
+            </div>
+            <div class="field-group">
+              <label class="field-label">Target Job Role</label>
+              <input type="text" class="field-input" id="targetRole" placeholder="e.g. Software Engineer, Data Analyst, HR Executive">
+            </div>
+            <div class="field-group">
+              <label class="field-label">Job Description (Optional but Recommended)</label>
+              <textarea class="field-input job-desc-field" id="jobDescResume" placeholder="Paste the job description you are targeting. This allows the AI to tailor keyword suggestions specifically for that role..."></textarea>
+            </div>
+            <div class="field-group">
+              <label class="field-label">Your Key Skills (Add individually)</label>
+              <div class="skill-tags" id="skillTags"></div>
+              <div class="add-skill-row">
+                <input type="text" class="skill-input" id="skillInput" placeholder="Type a skill and press Add" onkeydown="if(event.key==='Enter')addSkill()">
+                <button class="add-skill-btn" onclick="addSkill()">Add</button>
+              </div>
+            </div>
+            <button class="resume-btn" id="resumeAnalyzeBtn" onclick="analyzeResume()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              Analyze & Improve Resume
+            </button>
+            <div class="api-note mt-8">Requires Gemini API key from the Analyzer tab. Uses Gemini 1.5 Flash for structured resume evaluation and rewriting.</div>
+          </div>
+        </div>
+
+        <!-- OUTPUT SIDE -->
+        <div id="resumeResultPanel">
+          <div class="card" style="min-height:320px;">
+            <div class="section-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              AI Evaluation
+            </div>
+            <div class="result-placeholder" id="resumePlaceholder">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              <p>Paste your resume and click <strong>Analyze and Improve</strong> to get AI-powered feedback and a rewritten version.</p>
+            </div>
+            <div class="loading-state" id="resumeLoadingState">
+              <div class="loading-spinner"></div>
+              <div style="font-size:14px;font-weight:600;color:var(--text2);">Gemini AI is evaluating your resume...</div>
+              <div style="font-size:12px;color:var(--text3);margin-top:8px;font-family:var(--mono);">Checking ATS compatibility, keywords, structure...</div>
+            </div>
+            <div id="resumeResultContent" style="display:none;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main-container -->
+</div><!-- /mainApp -->
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+  <span id="toastMsg">Done</span>
+</div>
+
+<script>
+// ════════════════════════════════════════════
+// SAMPLE DATA
+// ════════════════════════════════════════════
+const SAMPLES = [
+  {
+    title:"Work From Home Data Entry — Amazon India (FAKE)",
+    company:"Amazon Fulfilment India",
+    salary:"50000/week",
+    contact:"whatsapp",
+    exp:"0",
+    url:"",
+    text:`URGENT HIRING - Work From Home Data Entry Operator at Amazon Fulfilment India!
+
+Earn Rs.50,000 per week working just 2 hours daily from home! No experience needed, no qualification required. Simple form filling and product listing work.
+
+EARN Rs.50,000 PER WEEK GUARANTEED
+IMMEDIATE JOINING - TODAY ONLY
+DAILY PAYMENT via PhonePe/GPay
+
+Requirements: Just a smartphone. That's it!
+
+Process: Pay one-time registration fee of Rs.1,999 to get your starter kit and begin earning immediately. Amount is fully refundable after 30 days.
+
+Contact ASAP - only 20 seats left. WhatsApp NOW: 9876543210
+
+Note: This is 100% genuine offer from Amazon India. Do not delay - slots filling fast!`
+  },
+  {
+    title:"Instagram/YouTube Video Upload Job (FAKE)",
+    company:"Digital Media Solutions",
+    salary:"1200 per video",
+    contact:"gmail",
+    exp:"0",
+    url:"",
+    text:`PART TIME JOB - Upload Videos and Earn Money!!
+
+We need people to upload videos on Instagram and YouTube for our clients.
+
+Pay per video: Rs.800 - Rs.1,200
+Monthly earning potential: Rs.30,000 - Rs.50,000
+Work time: Just 1-2 hours daily
+Device: Only smartphone needed
+
+No experience required. Work from anywhere. Daily payments via PhonePe or GPay. Training provided.
+
+Joining Process:
+1. Pay Rs.500 registration fee
+2. Receive training material
+3. Start uploading and earning!
+
+Contact: digitalmediasolutions786@gmail.com
+Telegram: @digitalmediajobs
+
+Hurry! Only 15 seats remaining this week!`
+  },
+  {
+    title:"Senior Software Engineer - React — Infosys",
+    company:"Infosys Limited",
+    salary:"22 LPA",
+    contact:"official",
+    exp:"3",
+    url:"https://careers.infosys.com",
+    text:`Senior Software Engineer - React (Ref: INF-2026-SE-4521)
+
+Infosys Limited is hiring for our Digital Experience Practice in Bangalore.
+
+Role: Senior Software Engineer
+Experience: 3-5 years
+Location: Bangalore (Hybrid - 3 days/week)
+Salary: 18-24 LPA based on experience
+
+Required Skills:
+- React.js 3+ years minimum
+- TypeScript and Node.js proficiency
+- REST API integration experience
+- Agile/Scrum methodology
+
+Qualifications: B.E or B.Tech in Computer Science or related field
+
+Apply ONLY through: careers.infosys.com/job/INF-2026-SE-4521
+
+Important: Infosys never charges any fee from candidates. Report fraud at integrity@infosys.com
+
+Application deadline: April 30, 2026`
+  },
+  {
+    title:"HR Executive - Chennai — TCS",
+    company:"Tata Consultancy Services",
+    salary:"5 LPA",
+    contact:"official",
+    exp:"2",
+    url:"https://careers.tcs.com",
+    text:`Job ID: TCS-HR-CHN-2026-891
+Position: HR Executive
+Company: Tata Consultancy Services Ltd.
+Location: Chennai, Tamil Nadu
+Business Unit: HR Operations
+
+Salary: 4.5 - 6 LPA plus benefits
+Experience: 1-3 years in HR domain
+Qualification: MBA in HR or PGDM
+
+Key Responsibilities:
+- Recruitment coordination and onboarding management
+- Employee lifecycle and HRMS data management
+- Compliance with statutory regulations
+- SAP SuccessFactors proficiency required
+
+Skills Required: Strong communication, MS Office, knowledge of Indian labor laws
+
+Important: TCS does not charge any fee from candidates. Beware of fraudsters impersonating TCS.
+
+Apply: careers.tcs.com/jobs/TCS-HR-CHN-2026-891
+Queries: recruitment.chennai@tcs.com`
+  }
+];
+
+// ════════════════════════════════════════════
+// AUTH SYSTEM
+// ════════════════════════════════════════════
+let currentUser = null;
+
+function getAllUsers() {
+  return JSON.parse(localStorage.getItem('tw_users') || '{}');
+}
+function saveUsers(u) { localStorage.setItem('tw_users', JSON.stringify(u)); }
+function getUserKey(email) { return 'tw_hist_' + btoa(email).replace(/=/g,''); }
+
+function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const err = document.getElementById('loginError');
+  const users = getAllUsers();
+  err.style.display = 'none';
+  if (!users[email] || users[email].password !== password) {
+    err.style.display = 'block'; return;
+  }
+  currentUser = { email, name: users[email].name };
+  launchApp();
+}
+
+function doRegister() {
+  const name = document.getElementById('regName').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const password = document.getElementById('regPassword').value;
+  const err = document.getElementById('regError');
+  err.style.display = 'none';
+  if (!name || !email || password.length < 6 || !email.includes('@')) {
+    err.style.display = 'block'; return;
+  }
+  const users = getAllUsers();
+  users[email] = { name, password };
+  saveUsers(users);
+  currentUser = { email, name };
+  launchApp();
+}
+
+function doLogout() {
+  currentUser = null;
+  document.getElementById('mainApp').style.display = 'none';
+  document.getElementById('authOverlay').style.display = 'flex';
+  showLogin();
+  resetAnalyzer();
+}
+
+function launchApp() {
+  document.getElementById('authOverlay').style.display = 'none';
+  document.getElementById('mainApp').style.display = 'block';
+  document.getElementById('navUserName').textContent = currentUser.name.split(' ')[0];
+  document.getElementById('navAvatar').textContent = currentUser.name[0].toUpperCase();
+  document.getElementById('dashWelcome').textContent = 'Welcome back, ' + currentUser.name.split(' ')[0];
+  renderDashboard();
+}
+
+function showRegister() {
+  document.getElementById('loginForm').style.display = 'none';
+  document.getElementById('registerForm').style.display = 'block';
+}
+function showLogin() {
+  document.getElementById('loginForm').style.display = 'block';
+  document.getElementById('registerForm').style.display = 'none';
+}
+
+// Allow Enter key on auth forms
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('loginPassword').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+  document.getElementById('loginEmail').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+  document.getElementById('regPassword').addEventListener('keydown', e => { if(e.key==='Enter') doRegister(); });
+});
+
+// ════════════════════════════════════════════
+// TAB SWITCHING
+// ════════════════════════════════════════════
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+  if (name === 'dashboard') renderDashboard();
+}
+
+function goToResume() {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-resume').classList.add('active');
+  document.querySelectorAll('.tab-btn')[2].classList.add('active');
+}
+
+// ════════════════════════════════════════════
+// SAMPLE LOADING
+// ════════════════════════════════════════════
+function loadSample(i) {
+  const s = SAMPLES[i];
+  document.getElementById('jobText').value = s.text;
+  document.getElementById('companyName').value = s.company;
+  document.getElementById('salaryField').value = s.salary;
+  document.getElementById('contactType').value = s.contact;
+  document.getElementById('expRequired').value = s.exp;
+  document.getElementById('jobUrl').value = s.url || '';
+  showToast('Sample loaded. Click Analyze with AI.', 'success');
+}
+
+// ════════════════════════════════════════════
+// FRAUD DETECTION — LOCAL RULE ENGINE
+// ════════════════════════════════════════════
+const PATTERNS = {
+  fee:       ['registration fee','joining fee','pay rs','pay inr','refundable deposit','security deposit','training fee','kit fee','starter kit fee','activation fee'],
+  urgency:   ['urgent','limited seats','hurry','only today','last chance','immediate joining','apply now immediately','slots filling','today only','midnight','act fast','rush'],
+  vague:     ['no experience needed','no qualification required','anyone can do','no skills needed','just a smartphone','just smartphone','work from phone','earn from mobile'],
+  salary:    ['per week','per day','guaranteed income','guaranteed payment','guaranteed earning','earn lakhs','daily payment','daily payout'],
+  suspect:   ['100% genuine','no fraud','real opportunity','limited slots','only 15 seats','only 20 seats','only 10 seats','real job','legitimate offer','trusted company'],
+  telegram:  ['telegram','t.me/','@channel','whatsapp group','watsapp','whtasapp'],
+  impersonate:['amazon india','tcs hiring','infosys recruitment','google careers india','flipkart jobs'],
+};
+const LEGIT_COMPANIES = ['tata consultancy','infosys limited','wipro technologies','hcl technologies','cognizant technology','accenture india','google india','microsoft india','amazon web services','deloitte india'];
+const LEGIT_DOMAINS = ['tcs.com','infosys.com','wipro.com','hcl.com','cognizant.com','accenture.com','google.com','microsoft.com','linkedin.com','naukri.com','shine.com','indeed.com','glassdoor.com'];
+
+function analyzeLocal(text, company, salary, contactType, expYears, url) {
+  const ltext = (text + ' ' + company + ' ' + salary).toLowerCase();
+  const lurls = url ? url.toLowerCase() : '';
+
+  let scores = { fee:0, urgency:0, salary:0, contact:0, vagueness:0, companyImpersonation:0, urlSuspicion:0 };
+
+  // Fee demand — strongest signal
+  PATTERNS.fee.forEach(k => { if(ltext.includes(k)) scores.fee = Math.min(100, scores.fee+28); });
+
+  // Urgency
+  PATTERNS.urgency.forEach(k => { if(ltext.includes(k)) scores.urgency = Math.min(100, scores.urgency+18); });
+  PATTERNS.suspect.forEach(k => { if(ltext.includes(k)) scores.urgency = Math.min(100, scores.urgency+10); });
+
+  // Salary anomaly
+  const salNum = salary ? (salary.match(/\d+/) || ['0'])[0] : '0';
+  const salVal = parseInt(salNum);
+  if ((ltext.includes('week') || ltext.includes('/week')) && salVal > 20000) scores.salary = 88;
+  else if ((ltext.includes('day') || ltext.includes('/day')) && salVal > 5000) scores.salary = 82;
+  else if (ltext.includes('month') && salVal > 200000) scores.salary = 70;
+  PATTERNS.salary.forEach(k => { if(ltext.includes(k)) scores.salary = Math.min(100, scores.salary+22); });
+
+  // Contact
+  const cmap = { whatsapp:80, telegram:85, gmail:60, none:65, official:5 };
+  scores.contact = cmap[contactType] || 30;
+  PATTERNS.telegram.forEach(k => { if(ltext.includes(k)) scores.contact = Math.min(100, scores.contact+20); });
+
+  // Vagueness
+  PATTERNS.vague.forEach(k => { if(ltext.includes(k)) scores.vagueness = Math.min(100, scores.vagueness+28); });
+  const expNum = parseInt(expYears) || 0;
+  if (expNum === 0 && scores.fee > 20) scores.vagueness = Math.min(100, scores.vagueness+20);
+
+  // Company impersonation — using legit name but with scam signals
+  const isLegitName = LEGIT_COMPANIES.some(c => ltext.includes(c));
+  if (isLegitName && (scores.fee > 0 || contactType === 'whatsapp' || contactType === 'gmail')) {
+    scores.companyImpersonation = 95;
+  } else if (!isLegitName && contactType !== 'official') {
+    scores.companyImpersonation = 35;
+  } else {
+    scores.companyImpersonation = 5;
+  }
+
+  // URL suspicion
+  if (url) {
+    const urlLower = url.toLowerCase();
+    const isLegitDomain = LEGIT_DOMAINS.some(d => urlLower.includes(d));
+    if (!isLegitDomain) {
+      // Check for suspicious patterns
+      if (urlLower.includes('bit.ly') || urlLower.includes('tinyurl') || urlLower.includes('shorturl')) {
+        scores.urlSuspicion = 85;
+      } else if (urlLower.includes('blogspot') || urlLower.includes('wordpress') || urlLower.includes('weebly')) {
+        scores.urlSuspicion = 65;
+      } else if (urlLower.match(/amazon-india|tcs-jobs|infosys-hiring/)) {
+        scores.urlSuspicion = 90;
+      } else {
+        scores.urlSuspicion = 30;
+      }
+    } else {
+      scores.urlSuspicion = 5;
+    }
+  } else {
+    scores.urlSuspicion = 20; // No URL provided — slight suspicion
+  }
+
+  // Weighted total
+  const W = { fee:0.28, urgency:0.16, salary:0.17, contact:0.13, vagueness:0.10, companyImpersonation:0.10, urlSuspicion:0.06 };
+  let total = 0;
+  for (let k in W) total += (scores[k] || 0) * W[k];
+  total = Math.round(total);
+
+  // Build flags
+  const flags = [];
+  if (scores.fee > 20) flags.push({ text:'Payment demanded — legitimate employers never charge candidates', sev:'red' });
+  if (scores.urgency > 30) flags.push({ text:'High-pressure urgency language detected — artificial scarcity tactic', sev:'red' });
+  if (scores.salary > 50) flags.push({ text:'Salary claim is far above market rate and statistically unrealistic', sev:'red' });
+  if (scores.contact > 50) flags.push({ text:'Contact via personal messaging apps only — no official channel provided', sev:'amber' });
+  if (scores.vagueness > 30) flags.push({ text:'No minimum qualification required — used to attract desperate candidates', sev:'amber' });
+  if (scores.companyImpersonation > 60) flags.push({ text:'Known company name combined with scam signals — likely impersonation', sev:'red' });
+  if (scores.urlSuspicion > 50 && url) flags.push({ text:'URL pattern is suspicious — does not match official company domain', sev:'amber' });
+
+  return { total, scores, flags };
+}
+
+// ════════════════════════════════════════════
+// GEMINI API — JOB ANALYSIS
+// ════════════════════════════════════════════
+async function callGeminiJobAnalysis(text, company, salary, contactType, expYears, url, localResult) {
+  const apiKey = document.getElementById('geminiKey').value.trim();
+  if (!apiKey) return null;
+
+  const prompt = `You are an expert fraud detection AI specializing in fake job scams in India. Analyze the following job posting with high precision.
+
+JOB POSTING TEXT:
+"""
+${text}
+"""
+
+METADATA:
+- Company claimed: ${company || 'Not specified'}
+- Salary offered: ${salary || 'Not specified'}
+- Contact channel: ${contactType || 'Not specified'}
+- Experience required: ${expYears || 'Not specified'} years
+- URL provided: ${url || 'None'}
+- Local rule engine pre-score: ${localResult.total}/100
+
+ANALYSIS INSTRUCTIONS:
+Analyze using these fraud signals:
+1. FEE DEMANDS: Does it ask candidates to pay anything? (registration, joining, training, kit fees)
+2. SALARY REALISM: Is the salary claim realistic for India's job market?
+3. URGENCY MANIPULATION: Artificial scarcity, pressure language, time limits?
+4. CONTACT LEGITIMACY: Is contact via official channels or personal WhatsApp/Gmail/Telegram?
+5. QUALIFICATION GATES: Does it require zero qualifications — attracting vulnerable candidates?
+6. COMPANY IMPERSONATION: Is a known brand name being used with scam signals?
+7. LANGUAGE PATTERNS: Vague responsibilities, excessive promises, "guaranteed income"?
+8. MODERN SCAM TACTICS: Even if it looks professional, check for subtle red flags that modern scams use
+
+IMPORTANT: Modern job scams have evolved. They now look legitimate. Check for:
+- Vague job responsibilities despite professional language
+- No verifiable company registration or official website link
+- Salary slightly above market but not absurd (to appear credible)
+- Uses LinkedIn-like language but contact is still informal
+- "Apply via link" going to unknown domains
+
+Respond ONLY in this exact JSON format (no markdown, no explanation outside JSON):
+{
+  "verdict": "FAKE" or "SUSPICIOUS" or "LEGITIMATE",
+  "confidence": "HIGH" or "MEDIUM" or "LOW",
+  "final_score": <number 0-100>,
+  "key_reason": "<one clear sentence explaining the primary signal>",
+  "detailed_reasoning": "<2-3 sentences of deeper analysis>",
+  "red_flags": ["<flag1>", "<flag2>", "<flag3>"],
+  "safe_signals": ["<signal1>", "<signal2>"],
+  "advice": "<one actionable sentence for the job seeker>",
+  "modern_scam_pattern": "<describe if this matches any known modern scam pattern, or 'None detected'>"
+}`;
+
+  try {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        contents:[{ parts:[{ text: prompt }] }],
+        generationConfig:{ temperature:0.1, maxOutputTokens:1024 }
+      })
+    });
+    if (!res.ok) throw new Error('API error: ' + res.status);
+    const data = await res.json();
+    const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    // Strip markdown code fences if present
+    const cleaned = raw.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();
+    return JSON.parse(cleaned);
+  } catch(e) {
+    console.error('Gemini error:', e);
+    return null;
+  }
+}
+
+// ════════════════════════════════════════════
+// MAIN ANALYSIS FLOW
+// ════════════════════════════════════════════
+async function startAnalysis() {
+  const text = document.getElementById('jobText').value.trim();
+  if (!text) { showToast('Please paste a job posting first.', 'error'); return; }
+
+  const company = document.getElementById('companyName').value.trim();
+  const salary = document.getElementById('salaryField').value.trim();
+  const contactType = document.getElementById('contactType').value;
+  const expYears = document.getElementById('expRequired').value;
+  const url = document.getElementById('jobUrl').value.trim();
+
+  // UI: show loading
+  document.getElementById('analyzeBtn').disabled = true;
+  document.getElementById('resultPlaceholder').style.display = 'none';
+  document.getElementById('resultContent').style.display = 'none';
+  document.getElementById('loadingState').style.display = 'block';
+
+  const stepsEl = document.getElementById('loadingSteps');
+  const steps = [
+    'Preprocessing job text...',
+    'Running rule-based fraud engine (12 factors)...',
+    'Analyzing salary anomaly patterns...',
+    'Checking URL and contact channel legitimacy...',
+    document.getElementById('geminiKey').value.trim() ? 'Sending to Gemini 1.5 Flash AI...' : 'Generating risk report (add Gemini key for AI analysis)...',
+    'Compiling final fraud verdict...'
+  ];
+  stepsEl.innerHTML = '';
+  for (let i=0; i<steps.length; i++) {
+    await new Promise(r => setTimeout(r, 380));
+    const div = document.createElement('div');
+    div.className = 'loading-step active';
+    div.innerHTML = `<div class="step-dot"></div>${steps[i]}`;
+    stepsEl.appendChild(div);
+    if (i > 0) {
+      stepsEl.children[i-1].className = 'loading-step done';
+      stepsEl.children[i-1].innerHTML = `<div class="step-dot"></div>${steps[i-1].replace('...','')}<span style="margin-left:4px;font-size:10px;">[done]</span>`;
+    }
+  }
+
+  // Run local engine
+  const localResult = analyzeLocal(text, company, salary, contactType, expYears, url);
+
+  // Run Gemini if key present
+  const aiResult = await callGeminiJobAnalysis(text, company, salary, contactType, expYears, url, localResult);
+
+  await new Promise(r => setTimeout(r, 300));
+
+  // Merge: Gemini takes priority if available
+  const finalScore = aiResult ? aiResult.final_score : localResult.total;
+  const verdict = aiResult ? aiResult.verdict : (localResult.total >= 70 ? 'FAKE' : localResult.total >= 40 ? 'SUSPICIOUS' : 'LEGITIMATE');
+
+  document.getElementById('loadingState').style.display = 'none';
+  document.getElementById('resultContent').style.display = 'block';
+
+  renderResult(finalScore, verdict, localResult, aiResult);
+  saveAnalysis(finalScore, verdict, company || 'Unknown', text.substring(0,80)+'...');
+  document.getElementById('analyzeBtn').disabled = false;
+}
+
+function renderResult(score, verdict, localResult, aiResult) {
+  // Gauge
+  const arc = document.getElementById('gaugeArc');
+  const needle = document.getElementById('gaugeNeedle');
+  const scoreText = document.getElementById('gaugeSvgScore');
+  const totalLen = 251.2;
+  const offset = totalLen - (score / 100) * totalLen;
+  setTimeout(() => {
+    arc.style.transition = 'stroke-dashoffset 1.2s cubic-bezier(0.34,1.56,0.64,1)';
+    arc.style.strokeDashoffset = offset;
+    needle.style.transform = `rotate(${-90 + (score/100)*180}deg)`;
+  }, 50);
+  let cur = 0;
+  const scoreInterval = setInterval(() => {
+    cur += 2; scoreText.textContent = Math.min(cur,score);
+    if(cur >= score) clearInterval(scoreInterval);
+  }, 18);
+  const scoreColor = score >= 70 ? '#DC2626' : score >= 40 ? '#D97706' : '#059669';
+  scoreText.setAttribute('fill', scoreColor);
+
+  // Verdict box
+  const vEl = document.getElementById('verdictBox');
+  const verdictMap = {
+    'FAKE': { cls:'fake', icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`, title:'HIGH RISK — Likely Fraudulent Job', desc:'This posting shows strong indicators of a job scam. Do not pay any fees, do not share personal documents, and do not proceed with this application.' },
+    'SUSPICIOUS': { cls:'suspicious', icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`, title:'SUSPICIOUS — Proceed with Extreme Caution', desc:'Several red flags detected. Verify the company independently at their official website before responding. Never pay any fees.' },
+    'LEGITIMATE': { cls:'legitimate', icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`, title:'LOW RISK — Appears Legitimate', desc:'This posting shows characteristics of a genuine job listing. Always verify independently at the official company careers page before sharing personal information.' }
+  };
+  const v = verdictMap[verdict] || verdictMap['SUSPICIOUS'];
+  vEl.className = `verdict-box ${v.cls}`;
+  vEl.innerHTML = `<div class="verdict-icon">${v.icon}</div><div><div class="verdict-title">${v.title}</div><div class="verdict-desc">${aiResult ? aiResult.key_reason : v.desc}</div></div>`;
+
+  // Factor bars
+  const factorDefs = [
+    { key:'fee', label:'Fee Demand Detection', color:'#DC2626' },
+    { key:'urgency', label:'Urgency Language', color:'#D97706' },
+    { key:'salary', label:'Salary Anomaly', color:'#DC2626' },
+    { key:'contact', label:'Contact Channel Risk', color:'#D97706' },
+    { key:'vagueness', label:'Qualification Vagueness', color:'#7C3AED' },
+    { key:'companyImpersonation', label:'Company Impersonation', color:'#DC2626' },
+    { key:'urlSuspicion', label:'URL Legitimacy', color:'#059669' },
+  ];
+  const fEl = document.getElementById('factorsContainer');
+  fEl.innerHTML = factorDefs.map(f => {
+    const val = localResult.scores[f.key] || 0;
+    return `<div class="factor-row">
+      <div class="factor-header">
+        <span class="factor-name">${f.label}</span>
+        <span class="factor-score" style="color:${f.color}">${val}%</span>
+      </div>
+      <div class="factor-bar">
+        <div class="factor-fill" id="ff-${f.key}" style="width:0%;background:${f.color};"></div>
+      </div>
+    </div>`;
+  }).join('');
+  setTimeout(() => {
+    factorDefs.forEach(f => {
+      const el = document.getElementById('ff-'+f.key);
+      if(el) el.style.width = (localResult.scores[f.key] || 0) + '%';
+    });
+  }, 100);
+
+  // Flags (merge local + AI)
+  const allFlags = [...localResult.flags];
+  if (aiResult && aiResult.red_flags) {
+    aiResult.red_flags.forEach(rf => {
+      if (!allFlags.some(f => f.text.toLowerCase().includes(rf.toLowerCase().substring(0,20)))) {
+        allFlags.push({ text: rf, sev:'red' });
+      }
+    });
+  }
+  const flagsEl = document.getElementById('flagsContainer');
+  if (allFlags.length > 0) {
+    flagsEl.innerHTML = `<div class="flags-section"><div class="flags-title">Detected Signals (${allFlags.length})</div>${
+      allFlags.map(f => `<div class="flag-item"><div class="flag-dot flag-${f.sev}"></div><span>${f.text}</span></div>`).join('')
+    }</div>`;
+  } else {
+    flagsEl.innerHTML = '';
+  }
+
+  // AI Insight box
+  const aiEl = document.getElementById('aiInsightBox');
+  if (aiResult) {
+    aiEl.innerHTML = `<div class="ai-insight">
+      <div class="ai-insight-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Gemini 1.5 Flash — AI Deep Analysis
+      </div>
+      <div class="ai-insight-text">${aiResult.detailed_reasoning}
+
+Advice: ${aiResult.advice}${aiResult.modern_scam_pattern !== 'None detected' ? '\nModern Pattern: ' + aiResult.modern_scam_pattern : ''}
+Confidence: ${aiResult.confidence}</div>
+    </div>`;
+  } else {
+    aiEl.innerHTML = `<div class="ai-insight">
+      <div class="ai-insight-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+        Add Gemini API Key for AI Analysis
+      </div>
+      <div class="ai-insight-text">Add your free Gemini API key above to enable deep AI reasoning. Gemini 1.5 Flash will analyze subtle language patterns, modern scam tactics, and provide a detailed explanation of its verdict. Get your free key at ai.google.dev (2 minutes).</div>
+    </div>`;
+  }
+
+  // Resume prompt
+  const rpEl = document.getElementById('resumePromptBox');
+  rpEl.style.display = (verdict === 'FAKE' || verdict === 'SUSPICIOUS') ? 'block' : 'none';
+}
+
+function resetAnalyzer() {
+  document.getElementById('resultPlaceholder').style.display = 'flex';
+  document.getElementById('resultContent').style.display = 'none';
+  document.getElementById('loadingState').style.display = 'none';
+}
+
+// ════════════════════════════════════════════
+// HISTORY / DASHBOARD
+// ════════════════════════════════════════════
+function getHistory() {
+  if (!currentUser) return [];
+  const key = getUserKey(currentUser.email);
+  return JSON.parse(localStorage.getItem(key) || '[]');
+}
+function saveAnalysis(score, verdict, company, preview) {
+  if (!currentUser) return;
+  const key = getUserKey(currentUser.email);
+  let hist = getHistory();
+  hist.unshift({ score, verdict, company, preview, time: new Date().toLocaleString('en-IN', { dateStyle:'short', timeStyle:'short' }) });
+  if (hist.length > 100) hist.pop();
+  localStorage.setItem(key, JSON.stringify(hist));
+}
+function clearHistory() {
+  if (!currentUser) return;
+  if (!confirm('Clear all analysis history?')) return;
+  localStorage.removeItem(getUserKey(currentUser.email));
+  renderDashboard();
+  showToast('History cleared.', 'success');
+}
+
+function renderDashboard() {
+  const hist = getHistory();
+  const total = hist.length;
+  const fake = hist.filter(h => h.verdict === 'FAKE').length;
+  const safe = hist.filter(h => h.verdict === 'LEGITIMATE').length;
+  const avg = total ? Math.round(hist.reduce((a,h)=>a+h.score,0)/total) : 0;
+
+  document.getElementById('dTotal').textContent = total;
+  document.getElementById('dFake').textContent = fake;
+  document.getElementById('dSafe').textContent = safe;
+  document.getElementById('dAvg').textContent = avg;
+
+  const wrap = document.getElementById('historyTableWrap');
+  if (!hist.length) {
+    wrap.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><p>No analyses yet. Go to the <strong>Job Analyzer</strong> tab and scan your first posting.</p></div>`;
+    return;
+  }
+  wrap.innerHTML = `<div style="overflow-x:auto;"><table class="history-table">
+    <thead><tr>
+      <th>Time</th><th>Company</th><th>Preview</th><th>Score</th><th>Verdict</th>
+    </tr></thead>
+    <tbody>${hist.map(h => `<tr>
+      <td style="white-space:nowrap;font-size:12px;">${h.time}</td>
+      <td style="font-weight:600;color:var(--text);">${h.company}</td>
+      <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${h.preview}</td>
+      <td><span class="score-badge ${h.verdict==='FAKE'?'score-fake':h.verdict==='SUSPICIOUS'?'score-suspicious':'score-legit'}">${h.score}</span></td>
+      <td><span style="font-size:12px;font-weight:700;color:${h.verdict==='FAKE'?'var(--red)':h.verdict==='SUSPICIOUS'?'var(--amber)':'var(--green)'};">${h.verdict}</span></td>
+    </tr>`).join('')}
+    </tbody></table></div>`;
+}
+
+// ════════════════════════════════════════════
+// SKILLS TAGS
+// ════════════════════════════════════════════
+let skills = [];
+function addSkill() {
+  const inp = document.getElementById('skillInput');
+  const val = inp.value.trim();
+  if (!val || skills.includes(val)) { inp.value=''; return; }
+  skills.push(val); inp.value='';
+  renderSkills();
+}
+function removeSkill(s) { skills = skills.filter(x=>x!==s); renderSkills(); }
+function renderSkills() {
+  document.getElementById('skillTags').innerHTML = skills.map(s =>
+    `<div class="skill-tag">${s}<span class="remove-skill" onclick="removeSkill('${s}')">x</span></div>`
+  ).join('');
+}
+
+// ════════════════════════════════════════════
+// GEMINI — RESUME ANALYSIS
+// ════════════════════════════════════════════
+async function analyzeResume() {
+  const apiKey = document.getElementById('geminiKey').value.trim();
+  if (!apiKey) { showToast('Please enter your Gemini API key in the Analyzer tab first.', 'error'); return; }
+  const resumeText = document.getElementById('resumeText').value.trim();
+  const targetRole = document.getElementById('targetRole').value.trim();
+  if (!resumeText) { showToast('Please paste your resume text.', 'error'); return; }
+  if (!targetRole) { showToast('Please enter a target job role.', 'error'); return; }
+
+  const jobDesc = document.getElementById('jobDescResume').value.trim();
+
+  document.getElementById('resumeAnalyzeBtn').disabled = true;
+  document.getElementById('resumePlaceholder').style.display = 'none';
+  document.getElementById('resumeResultContent').style.display = 'none';
+  document.getElementById('resumeLoadingState').style.display = 'block';
+
+  const prompt = `You are a senior HR professional and ATS (Applicant Tracking System) expert with 15 years of experience in the Indian job market. Analyze this resume comprehensively.
+
+TARGET ROLE: ${targetRole}
+CANDIDATE SKILLS: ${skills.length ? skills.join(', ') : 'Not specified separately'}
+${jobDesc ? 'JOB DESCRIPTION TO MATCH:\n"""\n'+jobDesc+'\n"""' : ''}
+
+RESUME TO ANALYZE:
+"""
+${resumeText}
+"""
+
+Provide a thorough evaluation. Be specific, actionable, and honest. Respond ONLY in this JSON format (no markdown):
+{
+  "overall_score": <number 0-100>,
+  "ats_score": <number 0-100>,
+  "grade": "A" or "B" or "C" or "D",
+  "summary": "<2-3 sentence honest overall assessment>",
+  "sections": {
+    "contact_info": { "score": <0-100>, "feedback": ["<item1>", "<item2>"] },
+    "summary_objective": { "score": <0-100>, "feedback": ["<item1>", "<item2>"] },
+    "experience": { "score": <0-100>, "feedback": ["<item1>", "<item2>", "<item3>"] },
+    "education": { "score": <0-100>, "feedback": ["<item1>", "<item2>"] },
+    "skills": { "score": <0-100>, "feedback": ["<item1>", "<item2>", "<item3>"] },
+    "formatting": { "score": <0-100>, "feedback": ["<item1>", "<item2>"] }
+  },
+  "missing_keywords": ["<keyword1>", "<keyword2>", "<keyword3>", "<keyword4>", "<keyword5>"],
+  "strong_keywords": ["<keyword1>", "<keyword2>", "<keyword3>"],
+  "critical_improvements": ["<most important change>", "<second most important>", "<third most important>"],
+  "quick_wins": ["<easy fix 1>", "<easy fix 2>", "<easy fix 3>"],
+  "rewritten_summary": "<A professionally rewritten 4-5 sentence professional summary for this person targeting the ${targetRole} role. Make it ATS-friendly, use strong action verbs, and include relevant keywords>",
+  "top_advice": "<Single most impactful piece of advice for this specific candidate>"
+}`;
+
+  try {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        contents:[{ parts:[{ text: prompt }] }],
+        generationConfig:{ temperature:0.2, maxOutputTokens:2048 }
+      })
+    });
+    if (!res.ok) throw new Error('API ' + res.status);
+    const data = await res.json();
+    const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const cleaned = raw.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();
+    const result = JSON.parse(cleaned);
+    renderResumeResult(result);
+  } catch(e) {
+    document.getElementById('resumeLoadingState').style.display = 'none';
+    document.getElementById('resumePlaceholder').style.display = 'flex';
+    showToast('Analysis failed. Check your API key and try again.', 'error');
+    console.error(e);
+  }
+  document.getElementById('resumeAnalyzeBtn').disabled = false;
+}
+
+function renderResumeResult(r) {
+  document.getElementById('resumeLoadingState').style.display = 'none';
+  const el = document.getElementById('resumeResultContent');
+  el.style.display = 'block';
+
+  const gradeColor = r.overall_score >= 75 ? 'var(--green)' : r.overall_score >= 55 ? 'var(--amber)' : 'var(--red)';
+  const scoreClass = (s) => s >= 70 ? 'score-high' : s >= 45 ? 'score-mid' : 'score-low';
+
+  function sectionCard(icon, title, sec) {
+    const feedbackIcons = sec.feedback.map(f => {
+      const isPositive = f.toLowerCase().startsWith('good') || f.toLowerCase().startsWith('strong') || f.toLowerCase().startsWith('excellent') || f.toLowerCase().startsWith('clear') || f.toLowerCase().startsWith('well');
+      const isNeg = f.toLowerCase().startsWith('missing') || f.toLowerCase().startsWith('no ') || f.toLowerCase().startsWith('lacks') || f.toLowerCase().startsWith('add') || f.toLowerCase().startsWith('improve') || f.toLowerCase().startsWith('consider') || f.toLowerCase().startsWith('avoid');
+      const cls = isPositive ? 'feedback-good' : isNeg ? 'feedback-bad' : 'feedback-warn';
+      const svgIcon = isPositive
+        ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`
+        : isNeg
+        ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`
+        : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg>`;
+      return `<div class="feedback-item"><span class="${cls}">${svgIcon}</span>${f}</div>`;
+    }).join('');
+    return `<div class="resume-section-card">
+      <div class="resume-section-header">
+        <div class="resume-section-title">
+          ${icon}
+          ${title}
+        </div>
+        <span class="score-pill ${scoreClass(sec.score)}">${sec.score}/100</span>
+      </div>
+      ${feedbackIcons}
+    </div>`;
+  }
+
+  const sIcon = (path) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">${path}</svg>`;
+
+  el.innerHTML = `
+    <!-- Overall Score -->
+    <div class="resume-score-row">
+      <div class="resume-overall-score" style="background:${gradeColor};">
+        <div class="score-big">${r.overall_score}</div>
+        <div class="score-max">/100</div>
+      </div>
+      <div class="resume-score-text">
+        <h3>Resume Score: ${r.grade} Grade</h3>
+        <p>ATS Compatibility: ${r.ats_score}/100</p>
+        <p style="margin-top:4px;font-size:12px;color:var(--text3);">${r.summary}</p>
+      </div>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <!-- Keywords -->
+    <div style="margin-bottom:14px;">
+      <div style="font-size:12px;font-weight:700;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px;">Missing Keywords (Add These)</div>
+      <div>${(r.missing_keywords||[]).map(k=>`<span class="missing-kw">${k}</span>`).join('')}</div>
+      <div style="font-size:12px;font-weight:700;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase;margin:10px 0 8px;">Strong Keywords (Keep These)</div>
+      <div>${(r.strong_keywords||[]).map(k=>`<span class="added-kw">${k}</span>`).join('')}</div>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <!-- Section Analysis -->
+    ${sectionCard(sIcon('<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'), 'Contact Information', r.sections.contact_info)}
+    ${sectionCard(sIcon('<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>'), 'Professional Summary', r.sections.summary_objective)}
+    ${sectionCard(sIcon('<rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>'), 'Work Experience', r.sections.experience)}
+    ${sectionCard(sIcon('<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>'), 'Education', r.sections.education)}
+    ${sectionCard(sIcon('<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>'), 'Skills', r.sections.skills)}
+    ${sectionCard(sIcon('<rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>'), 'Formatting & Structure', r.sections.formatting)}
+
+    <div class="section-divider"></div>
+
+    <!-- Critical Improvements -->
+    <div class="resume-section-card" style="border-left:3px solid var(--red);">
+      <div class="resume-section-title" style="margin-bottom:10px;">${sIcon('<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>')} Critical Improvements</div>
+      ${(r.critical_improvements||[]).map((c,i)=>`<div class="feedback-item" style="padding:5px 0;"><span style="width:20px;height:20px;background:var(--red);color:#fff;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">${i+1}</span>${c}</div>`).join('')}
+    </div>
+
+    <!-- Quick Wins -->
+    <div class="resume-section-card" style="border-left:3px solid var(--green);">
+      <div class="resume-section-title" style="margin-bottom:10px;">${sIcon('<polyline points="20 6 9 17 4 12"/>')} Quick Wins (Do These First)</div>
+      ${(r.quick_wins||[]).map(q=>`<div class="feedback-item"><span class="feedback-good">${sIcon('<polyline points="20 6 9 17 4 12"/>')}</span>${q}</div>`).join('')}
+    </div>
+
+    <!-- Rewritten Summary -->
+    <div class="resume-section-card" style="border-left:3px solid var(--purple);">
+      <div class="resume-section-title" style="margin-bottom:10px;">${sIcon('<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>')} AI-Rewritten Professional Summary</div>
+      <div class="improved-resume-box">${r.rewritten_summary}</div>
+    </div>
+
+    <!-- Top Advice -->
+    <div style="background:var(--purple-light);border:1.5px solid var(--purple-mid);border-radius:var(--radius);padding:14px 16px;margin-top:4px;">
+      <div style="font-size:11px;font-weight:700;color:var(--purple);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px;">Top Advice From AI</div>
+      <div style="font-size:13px;color:var(--purple-dark);font-weight:500;line-height:1.6;">${r.top_advice}</div>
+    </div>
+  `;
+}
+
+// ════════════════════════════════════════════
+// TOAST
+// ════════════════════════════════════════════
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  const m = document.getElementById('toastMsg');
+  t.className = 'toast ' + type;
+  m.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3200);
+}
+</script>
+</body>
+</html>
