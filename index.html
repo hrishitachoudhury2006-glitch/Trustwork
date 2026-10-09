@@ -1,0 +1,1685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TrustWork — AI Job Fraud Detection Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════════════ */
+:root {
+  --p: #6D28D9;
+  --p2: #7C3AED;
+  --p3: #8B5CF6;
+  --pl: #EDE9FE;
+  --pl2: #F5F3FF;
+  --pd: #4C1D95;
+  --pd2: #2E1065;
+  --bg: #FAFAF9;
+  --bg2: #F4F2FF;
+  --sur: #FFFFFF;
+  --sur2: #F9F8FF;
+  --bdr: #E4E2F5;
+  --bdr2: #CDC9EF;
+  --tx: #18122B;
+  --tx2: #3D3660;
+  --tx3: #7B72A8;
+  --red: #DC2626; --redbg: #FEF2F2; --redbdr: #FECACA;
+  --amb: #D97706; --ambbg: #FFFBEB; --ambbdr: #FDE68A;
+  --grn: #059669; --grnbg: #ECFDF5; --grnbdr: #A7F3D0;
+  --blu: #2563EB; --blubg: #EFF6FF;
+  --sh: 0 1px 4px rgba(109,40,217,.07), 0 1px 2px rgba(0,0,0,.04);
+  --shm: 0 4px 20px rgba(109,40,217,.11), 0 2px 8px rgba(0,0,0,.04);
+  --shl: 0 8px 40px rgba(109,40,217,.14), 0 4px 16px rgba(0,0,0,.06);
+  --r: 10px; --rl: 16px; --rxl: 24px;
+  --sans: 'Outfit', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+  --tr: 0.17s cubic-bezier(.4,0,.2,1);
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body { font-family:var(--sans); background:var(--bg); color:var(--tx); font-size:15px; line-height:1.6; min-height:100vh; }
+button { font-family:var(--sans); cursor:pointer; }
+input, textarea, select { font-family:var(--sans); }
+::-webkit-scrollbar { width:5px; } ::-webkit-scrollbar-thumb { background:var(--p3); border-radius:3px; }
+
+/* ═══════════════════════════════════════════════
+   AUTH
+═══════════════════════════════════════════════ */
+#authWall {
+  position:fixed; inset:0; z-index:2000;
+  background:linear-gradient(140deg, #F5F3FF 0%, #EEF2FF 40%, #F9F8FF 100%);
+  display:flex; align-items:center; justify-content:center;
+}
+.auth-wrap {
+  width:100%; max-width:420px; padding:0 16px;
+}
+.auth-card {
+  background:var(--sur); border:1px solid var(--bdr);
+  border-radius:var(--rxl); padding:44px 40px;
+  box-shadow:var(--shl);
+}
+.auth-logo-row { display:flex; align-items:center; gap:12px; justify-content:center; margin-bottom:32px; }
+.auth-logo-text { font-size:26px; font-weight:800; color:var(--tx); letter-spacing:-.03em; }
+.auth-logo-text em { color:var(--p2); font-style:normal; }
+.auth-tagline { font-size:11px; color:var(--tx3); font-style:italic; text-align:center; margin-top:-28px; margin-bottom:28px; }
+.fld { margin-bottom:16px; }
+.fld label { display:block; font-size:11px; font-weight:700; color:var(--tx2); letter-spacing:.05em; text-transform:uppercase; margin-bottom:5px; }
+.inp {
+  width:100%; padding:11px 14px; border:1.5px solid var(--bdr2);
+  border-radius:var(--r); font-size:14px; color:var(--tx);
+  background:var(--sur); outline:none; transition:border-color var(--tr), box-shadow var(--tr);
+}
+.inp:focus { border-color:var(--p2); box-shadow:0 0 0 3px rgba(109,40,217,.1); }
+.inp::placeholder { color:var(--tx3); font-size:13px; }
+.btn-auth {
+  width:100%; padding:13px; background:var(--p2); color:#fff; border:none;
+  border-radius:var(--r); font-size:15px; font-weight:700; letter-spacing:.01em;
+  transition:background var(--tr), transform var(--tr), box-shadow var(--tr);
+  margin-top:4px;
+}
+.btn-auth:hover { background:var(--p); transform:translateY(-1px); box-shadow:var(--shm); }
+.auth-sw { text-align:center; font-size:13px; color:var(--tx3); margin-top:18px; }
+.auth-sw b { color:var(--p2); cursor:pointer; font-weight:600; }
+.auth-sw b:hover { text-decoration:underline; }
+.auth-err { font-size:12px; color:var(--red); margin-top:5px; display:none; }
+.auth-title { font-size:20px; font-weight:800; text-align:center; margin-bottom:4px; color:var(--tx); }
+.auth-sub { font-size:13px; color:var(--tx3); text-align:center; margin-bottom:24px; }
+
+/* ═══════════════════════════════════════════════
+   NAV
+═══════════════════════════════════════════════ */
+#appNav {
+  background:var(--sur); border-bottom:1px solid var(--bdr);
+  position:sticky; top:0; z-index:100;
+  box-shadow:0 1px 0 rgba(109,40,217,.06);
+}
+.nav-in { max-width:1200px; margin:0 auto; padding:0 24px; height:64px; display:flex; align-items:center; justify-content:space-between; }
+.nav-logo { display:flex; align-items:center; gap:10px; }
+.nav-logo-txt { font-size:20px; font-weight:800; color:var(--tx); letter-spacing:-.03em; }
+.nav-logo-txt em { color:var(--p2); font-style:normal; }
+.nav-tag { font-size:10px; color:var(--tx3); font-style:italic; margin-top:-3px; }
+.nav-r { display:flex; align-items:center; gap:10px; }
+.nav-user-pill { display:flex; align-items:center; gap:8px; padding:5px 12px 5px 5px; border:1.5px solid var(--bdr); border-radius:24px; }
+.nav-av { width:28px; height:28px; border-radius:50%; background:var(--p2); color:#fff; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; }
+.nav-uname { font-size:13px; font-weight:600; color:var(--tx2); }
+.btn-out { padding:7px 14px; border:1.5px solid var(--bdr2); background:transparent; border-radius:8px; font-size:12px; font-weight:700; color:var(--tx3); transition:all var(--tr); letter-spacing:.02em; }
+.btn-out:hover { border-color:var(--red); color:var(--red); }
+
+/* API KEY STATUS BANNER */
+.api-banner {
+  background:var(--ambbg); border-bottom:1px solid var(--ambbdr);
+  padding:8px 24px; text-align:center; font-size:12.5px; color:var(--amb);
+  display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap;
+}
+.api-banner.connected { background:var(--grnbg); border-bottom-color:var(--grnbdr); color:var(--grn); }
+.api-banner svg { width:14px; height:14px; flex-shrink:0; }
+#apiBannerKey { width:220px; padding:4px 10px; border:1.5px solid var(--ambbdr); border-radius:6px; font-size:12px; font-family:var(--mono); background:var(--sur); outline:none; color:var(--tx); }
+.api-banner.connected #apiBannerKey { border-color:var(--grnbdr); }
+#apiConnectBtn { padding:5px 14px; background:var(--amb); color:#fff; border:none; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer; transition:background var(--tr); }
+.api-banner.connected #apiConnectBtn { background:var(--grn); }
+#apiConnectBtn:hover { opacity:.88; }
+
+/* ═══════════════════════════════════════════════
+   TABS
+═══════════════════════════════════════════════ */
+.tabs-bar { background:var(--sur); border-bottom:1px solid var(--bdr); }
+.tabs-in { max-width:1200px; margin:0 auto; padding:0 24px; display:flex; overflow-x:auto; }
+.tbtn {
+  padding:16px 22px; font-size:13.5px; font-weight:600; color:var(--tx3);
+  background:none; border:none; border-bottom:2.5px solid transparent;
+  display:flex; align-items:center; gap:8px; cursor:pointer;
+  transition:all var(--tr); white-space:nowrap; margin-bottom:-1px;
+}
+.tbtn svg { width:15px; height:15px; }
+.tbtn:hover { color:var(--p2); }
+.tbtn.on { color:var(--p2); border-bottom-color:var(--p2); }
+
+/* ═══════════════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════════════ */
+.wrap { max-width:1200px; margin:0 auto; padding:28px 24px; }
+.panel { display:none; } .panel.on { display:block; }
+.grid2 { display:grid; grid-template-columns:1fr 1fr; gap:22px; align-items:start; }
+.grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; }
+.grid4 { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+@media(max-width:900px){ .grid2,.grid3{ grid-template-columns:1fr; } .grid4{ grid-template-columns:repeat(2,1fr); } }
+
+/* ═══════════════════════════════════════════════
+   CARDS
+═══════════════════════════════════════════════ */
+.card { background:var(--sur); border:1px solid var(--bdr); border-radius:var(--rl); padding:22px; box-shadow:var(--sh); }
+.card-hd { font-size:11px; font-weight:800; color:var(--tx3); letter-spacing:.08em; text-transform:uppercase; display:flex; align-items:center; gap:7px; margin-bottom:16px; }
+.card-hd svg { width:14px; height:14px; color:var(--p2); }
+.card-hd .dot { width:6px; height:6px; border-radius:50%; background:var(--p2); }
+
+/* ═══════════════════════════════════════════════
+   FORM ELEMENTS
+═══════════════════════════════════════════════ */
+.frow { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px; }
+@media(max-width:500px){ .frow{ grid-template-columns:1fr; } }
+.fl { margin-bottom:12px; }
+.fl label { display:block; font-size:11px; font-weight:700; color:var(--tx2); letter-spacing:.05em; text-transform:uppercase; margin-bottom:4px; }
+textarea.inp { min-height:130px; resize:vertical; line-height:1.6; }
+select.inp { cursor:pointer; }
+
+.btn-main {
+  width:100%; padding:13px 18px; background:linear-gradient(135deg,var(--p2),var(--p));
+  color:#fff; border:none; border-radius:var(--r); font-size:15px; font-weight:700;
+  display:flex; align-items:center; justify-content:center; gap:9px; margin-top:12px;
+  transition:all var(--tr); letter-spacing:.01em; position:relative; overflow:hidden;
+}
+.btn-main::after { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(255,255,255,.12),transparent); }
+.btn-main:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 6px 24px rgba(109,40,217,.3); }
+.btn-main:active:not(:disabled) { transform:translateY(0); }
+.btn-main:disabled { opacity:.45; cursor:not-allowed; transform:none !important; }
+.btn-main svg { width:18px; height:18px; }
+
+/* Sample chips */
+.chips { display:flex; flex-wrap:wrap; gap:7px; margin-top:12px; }
+.chip { padding:5px 13px; border:1.5px solid var(--bdr2); border-radius:20px; font-size:11.5px; font-weight:600; color:var(--tx2); cursor:pointer; transition:all var(--tr); display:flex; align-items:center; gap:5px; }
+.chip:hover { border-color:var(--p2); color:var(--p2); background:var(--pl); }
+.chip.bad { border-color:var(--redbdr); color:var(--red); background:var(--redbg); }
+.chip.good { border-color:var(--grnbdr); color:var(--grn); background:var(--grnbg); }
+.chip svg { width:10px; height:10px; }
+
+/* ═══════════════════════════════════════════════
+   AI CALL LOG
+═══════════════════════════════════════════════ */
+.ai-log {
+  background:var(--pd2); border-radius:var(--r); padding:14px 16px;
+  font-family:var(--mono); font-size:11px; color:#a78bfa; max-height:180px;
+  overflow-y:auto; line-height:1.8; margin-bottom:14px;
+}
+.ai-log .log-ts { color:#6b7280; }
+.ai-log .log-ok { color:#34d399; }
+.ai-log .log-err { color:#f87171; }
+.ai-log .log-send { color:#93c5fd; }
+.ai-log .log-recv { color:#fde68a; }
+.ai-log .log-step { color:#c4b5fd; }
+
+/* ═══════════════════════════════════════════════
+   GAUGE
+═══════════════════════════════════════════════ */
+.gauge-wrap { position:relative; width:260px; height:160px; margin:0 auto 10px; }
+.gauge-wrap canvas { display:block; }
+.gauge-center {
+  position:absolute; bottom:10px; left:50%; transform:translateX(-50%);
+  text-align:center; pointer-events:none;
+}
+.gauge-score { font-family:var(--mono); font-size:42px; font-weight:700; line-height:1; transition:color .5s; }
+.gauge-label { font-size:10px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--tx3); margin-top:2px; }
+.gauge-verdict-label { font-size:13px; font-weight:700; margin-top:4px; transition:color .5s; }
+
+/* ═══════════════════════════════════════════════
+   RADAR CHART
+═══════════════════════════════════════════════ */
+.radar-wrap { position:relative; width:240px; height:240px; margin:0 auto; }
+
+/* ═══════════════════════════════════════════════
+   TEXT ANNOTATION
+═══════════════════════════════════════════════ */
+.annotated-text {
+  background:var(--bg2); border:1.5px solid var(--bdr); border-radius:var(--r);
+  padding:14px; font-size:12.5px; line-height:2; max-height:280px; overflow-y:auto;
+  white-space:pre-wrap; word-break:break-word;
+}
+.ann-fee { background:#FEE2E2; color:#991B1B; border-radius:3px; padding:1px 4px; }
+.ann-urgency { background:#FEF3C7; color:#92400E; border-radius:3px; padding:1px 4px; }
+.ann-vague { background:#EDE9FE; color:#4C1D95; border-radius:3px; padding:1px 4px; }
+.ann-salary { background:#DBEAFE; color:#1E40AF; border-radius:3px; padding:1px 4px; }
+
+/* ═══════════════════════════════════════════════
+   VERDICT BOX
+═══════════════════════════════════════════════ */
+.vbox { border-radius:var(--r); padding:14px 16px; margin-bottom:14px; display:flex; align-items:flex-start; gap:12px; }
+.vbox.fake { background:var(--redbg); border:1.5px solid var(--redbdr); }
+.vbox.sus  { background:var(--ambbg); border:1.5px solid var(--ambbdr); }
+.vbox.ok   { background:var(--grnbg); border:1.5px solid var(--grnbdr); }
+.vbox-icon { width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.vbox.fake .vbox-icon { background:var(--red); }
+.vbox.sus  .vbox-icon { background:var(--amb); }
+.vbox.ok   .vbox-icon { background:var(--grn); }
+.vbox-icon svg { width:18px; height:18px; color:#fff; }
+.vbox-title { font-size:14px; font-weight:800; margin-bottom:2px; }
+.vbox.fake .vbox-title { color:var(--red); }
+.vbox.sus  .vbox-title { color:var(--amb); }
+.vbox.ok   .vbox-title { color:var(--grn); }
+.vbox-desc { font-size:12px; color:var(--tx2); line-height:1.55; }
+
+/* ═══════════════════════════════════════════════
+   FACTOR BARS
+═══════════════════════════════════════════════ */
+.fbar-row { margin-bottom:9px; }
+.fbar-hd { display:flex; justify-content:space-between; margin-bottom:3px; }
+.fbar-name { font-size:12px; font-weight:500; color:var(--tx2); }
+.fbar-val { font-size:11.5px; font-family:var(--mono); font-weight:600; }
+.fbar-track { height:6px; background:var(--bdr); border-radius:3px; overflow:hidden; }
+.fbar-fill { height:100%; border-radius:3px; transition:width 1.2s cubic-bezier(.34,1.56,.64,1); }
+
+/* ═══════════════════════════════════════════════
+   GEMINI ANALYSIS BOX
+═══════════════════════════════════════════════ */
+.gemini-box {
+  background:linear-gradient(135deg,var(--pl2),#EEF2FF);
+  border:1.5px solid var(--p3); border-radius:var(--r); padding:14px 16px; margin-top:12px;
+}
+.gemini-hd { font-size:10px; font-weight:800; color:var(--p2); letter-spacing:.1em; text-transform:uppercase; margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+.gemini-hd svg { width:12px; height:12px; }
+.gemini-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px; }
+.gemini-kv { background:rgba(255,255,255,.7); border-radius:6px; padding:7px 10px; }
+.gemini-k { font-size:9px; font-weight:800; color:var(--tx3); letter-spacing:.06em; text-transform:uppercase; margin-bottom:2px; }
+.gemini-v { font-size:13px; font-weight:700; color:var(--p2); }
+.gemini-text { font-size:12px; color:var(--tx2); line-height:1.65; }
+
+/* ═══════════════════════════════════════════════
+   FLAGS
+═══════════════════════════════════════════════ */
+.flags-section { margin-top:12px; }
+.flags-hd { font-size:10px; font-weight:800; color:var(--tx3); letter-spacing:.08em; text-transform:uppercase; margin-bottom:7px; }
+.flag { display:flex; align-items:flex-start; gap:7px; font-size:12px; color:var(--tx2); padding:4px 0; border-bottom:1px solid var(--bdr); line-height:1.5; }
+.flag:last-child { border:none; }
+.fdot { width:5px; height:5px; border-radius:50%; flex-shrink:0; margin-top:5px; }
+
+/* ═══════════════════════════════════════════════
+   RESUME PROMPT BANNER
+═══════════════════════════════════════════════ */
+.res-prompt {
+  background:linear-gradient(135deg,var(--pl),#EEF2FF);
+  border:1.5px solid var(--p3); border-radius:var(--r); padding:14px 16px;
+  margin-top:12px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
+}
+.res-prompt-txt { font-size:13px; font-weight:700; color:var(--pd); }
+.res-prompt-sub { font-size:11.5px; color:var(--tx2); margin-top:2px; }
+.btn-res { padding:9px 16px; background:var(--p2); color:#fff; border:none; border-radius:8px; font-size:13px; font-weight:700; cursor:pointer; transition:all var(--tr); white-space:nowrap; display:flex; align-items:center; gap:6px; }
+.btn-res:hover { background:var(--p); transform:translateY(-1px); }
+.btn-res svg { width:14px; height:14px; }
+
+/* ═══════════════════════════════════════════════
+   LOADING
+═══════════════════════════════════════════════ */
+.spin { width:40px; height:40px; border:3px solid var(--pl); border-top-color:var(--p2); border-radius:50%; animation:spin .75s linear infinite; margin:0 auto 14px; }
+@keyframes spin { to { transform:rotate(360deg); } }
+.load-steps { text-align:left; margin-top:12px; }
+.lstep { font-size:11.5px; font-family:var(--mono); color:var(--tx3); padding:2px 0; display:flex; align-items:center; gap:7px; }
+.lstep.done { color:var(--grn); }
+.lstep.live { color:var(--p2); }
+.lstep .ldot { width:5px; height:5px; border-radius:50%; background:currentColor; flex-shrink:0; }
+
+/* ═══════════════════════════════════════════════
+   DASHBOARD
+═══════════════════════════════════════════════ */
+.stat-card { background:var(--sur); border:1px solid var(--bdr); border-radius:var(--rl); padding:20px; box-shadow:var(--sh); }
+.stat-lbl { font-size:10px; font-weight:800; color:var(--tx3); letter-spacing:.07em; text-transform:uppercase; margin-bottom:8px; }
+.stat-val { font-size:30px; font-weight:800; font-family:var(--mono); line-height:1; }
+.stat-sub { font-size:11px; color:var(--tx3); margin-top:4px; }
+.htable { width:100%; border-collapse:collapse; font-size:12.5px; }
+.htable th { padding:10px 16px; text-align:left; font-size:10px; font-weight:800; color:var(--tx3); letter-spacing:.06em; text-transform:uppercase; border-bottom:1px solid var(--bdr); background:var(--bg); }
+.htable td { padding:12px 16px; color:var(--tx2); border-bottom:1px solid var(--bdr); }
+.htable tr:last-child td { border:none; }
+.htable tr:hover td { background:var(--bg); }
+.sbadge { display:inline-flex; align-items:center; font-family:var(--mono); font-size:11px; font-weight:700; padding:3px 9px; border-radius:6px; }
+.sbadge.f { background:var(--redbg); color:var(--red); border:1px solid var(--redbdr); }
+.sbadge.s { background:var(--ambbg); color:var(--amb); border:1px solid var(--ambbdr); }
+.sbadge.l { background:var(--grnbg); color:var(--grn); border:1px solid var(--grnbdr); }
+
+/* ═══════════════════════════════════════════════
+   RESUME TOOL
+═══════════════════════════════════════════════ */
+.res-hero { background:linear-gradient(135deg,var(--p2),var(--pd)); border-radius:var(--rl); padding:28px 32px; color:#fff; margin-bottom:24px; }
+.res-hero h1 { font-size:22px; font-weight:800; margin-bottom:6px; }
+.res-hero p { font-size:13.5px; opacity:.85; max-width:560px; line-height:1.6; }
+.res-badges { display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
+.rbadge { background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.25); border-radius:20px; padding:4px 12px; font-size:11.5px; font-weight:600; }
+.sec-score { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+.sec-title { font-size:13px; font-weight:700; color:var(--tx); display:flex; align-items:center; gap:7px; }
+.sec-title svg { width:13px; height:13px; color:var(--p2); }
+.spill { font-size:10.5px; font-family:var(--mono); font-weight:700; padding:3px 9px; border-radius:20px; }
+.spill.h { background:var(--grnbg); color:var(--grn); border:1px solid var(--grnbdr); }
+.spill.m { background:var(--ambbg); color:var(--amb); border:1px solid var(--ambbdr); }
+.spill.l { background:var(--redbg); color:var(--red); border:1px solid var(--redbdr); }
+.fb { font-size:12px; color:var(--tx2); padding:3px 0; display:flex; gap:7px; align-items:flex-start; line-height:1.5; }
+.fb svg { width:12px; height:12px; flex-shrink:0; margin-top:2px; }
+.kw-miss { display:inline-block; padding:3px 8px; background:var(--redbg); color:var(--red); border-radius:4px; font-size:10.5px; font-weight:600; margin:2px; border:1px solid var(--redbdr); }
+.kw-ok { display:inline-block; padding:3px 8px; background:var(--grnbg); color:var(--grn); border-radius:4px; font-size:10.5px; font-weight:600; margin:2px; border:1px solid var(--grnbdr); }
+.rewrite-box { background:var(--bg2); border:1.5px solid var(--bdr2); border-radius:var(--r); padding:14px; font-size:12.5px; color:var(--tx2); line-height:1.75; white-space:pre-wrap; max-height:280px; overflow-y:auto; font-family:var(--mono); }
+.skill-tag { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; background:var(--pl); color:var(--pd); border-radius:20px; font-size:11.5px; font-weight:600; margin:2px; }
+.skill-rm { cursor:pointer; font-size:13px; font-weight:800; line-height:1; }
+.add-skill-row { display:flex; gap:7px; margin-top:8px; }
+.skill-inp { flex:1; padding:7px 11px; border:1.5px solid var(--bdr2); border-radius:7px; font-size:12.5px; outline:none; }
+.skill-inp:focus { border-color:var(--p2); }
+.btn-addsk { padding:7px 14px; background:var(--p2); color:#fff; border:none; border-radius:7px; font-size:12px; font-weight:700; cursor:pointer; }
+
+/* ═══════════════════════════════════════════════
+   LIVE RISK TICKER
+═══════════════════════════════════════════════ */
+.live-risk {
+  display:flex; gap:6px; flex-wrap:wrap; margin-top:10px; padding:10px 12px;
+  background:var(--bg2); border-radius:var(--r); border:1px solid var(--bdr); min-height:38px;
+}
+.risk-pill { padding:3px 10px; border-radius:20px; font-size:10.5px; font-weight:700; font-family:var(--mono); opacity:0; transition:opacity .3s, transform .3s; transform:translateY(4px); }
+.risk-pill.show { opacity:1; transform:translateY(0); }
+.rp-fee { background:var(--redbg); color:var(--red); border:1px solid var(--redbdr); }
+.rp-urg { background:var(--ambbg); color:var(--amb); border:1px solid var(--ambbdr); }
+.rp-sal { background:var(--blubg); color:var(--blu); border:1px solid #BFDBFE; }
+.rp-vag { background:var(--pl); color:var(--pd); border:1px solid var(--p3); }
+.rp-ok  { background:var(--grnbg); color:var(--grn); border:1px solid var(--grnbdr); }
+.live-lbl { font-size:10px; font-weight:700; color:var(--tx3); letter-spacing:.06em; text-transform:uppercase; margin-bottom:4px; }
+
+/* ═══════════════════════════════════════════════
+   PROCESS TIMELINE
+═══════════════════════════════════════════════ */
+.timeline { position:relative; padding-left:20px; }
+.tl-item { position:relative; padding:0 0 16px 16px; }
+.tl-item::before { content:''; position:absolute; left:0; top:5px; bottom:0; width:2px; background:var(--bdr); }
+.tl-item:last-child::before { display:none; }
+.tl-dot { position:absolute; left:-5px; top:4px; width:12px; height:12px; border-radius:50%; border:2px solid; flex-shrink:0; background:var(--sur); }
+.tl-item.ok .tl-dot { border-color:var(--grn); background:var(--grn); }
+.tl-item.bad .tl-dot { border-color:var(--red); background:var(--redbg); }
+.tl-item.warn .tl-dot { border-color:var(--amb); background:var(--ambbg); }
+.tl-title { font-size:12.5px; font-weight:700; color:var(--tx); }
+.tl-desc { font-size:11.5px; color:var(--tx3); margin-top:1px; line-height:1.5; }
+
+/* ═══════════════════════════════════════════════
+   MISC
+═══════════════════════════════════════════════ */
+.empty-st { padding:40px 20px; text-align:center; color:var(--tx3); }
+.empty-st svg { width:36px; height:36px; color:var(--p3); margin:0 auto 10px; display:block; }
+.divider { height:1px; background:var(--bdr); margin:16px 0; }
+.toast { position:fixed; bottom:22px; right:22px; background:var(--tx); color:#fff; padding:11px 18px; border-radius:10px; font-size:12.5px; font-weight:600; transform:translateY(16px); opacity:0; transition:all .28s; z-index:999; display:flex; align-items:center; gap:8px; max-width:300px; }
+.toast.show { transform:translateY(0); opacity:1; }
+.toast.ok { background:var(--grn); }
+.toast.err { background:var(--red); }
+.mt6{margin-top:6px} .mt10{margin-top:10px} .mt14{margin-top:14px} .mt20{margin-top:20px}
+.bold { font-weight:700; }
+</style>
+</head>
+<body>
+
+<!-- ══ AUTH ══════════════════════════════════ -->
+<div id="authWall">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-logo-row">
+        <svg width="38" height="38" viewBox="0 0 40 40" fill="none">
+          <path d="M20 3L5 9V20C5 29 12 37 20 39C28 37 35 29 35 20V9L20 3Z" fill="#7C3AED"/>
+          <path d="M14 20.5L18 24.5L26 16.5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="27" cy="26" r="5" stroke="white" stroke-width="1.8" fill="rgba(255,255,255,.12)"/>
+          <path d="M31 30L34 33" stroke="white" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <div><div class="auth-logo-text">Trust<em>Work</em></div></div>
+      </div>
+      <div class="auth-tagline">Because every opportunity should be real</div>
+
+      <div id="lf">
+        <div class="auth-title">Welcome back</div>
+        <div class="auth-sub">Sign in to your account</div>
+        <div class="fld"><label>Email</label><input type="email" id="le" class="inp" placeholder="you@example.com"></div>
+        <div class="fld"><label>Password</label><input type="password" id="lp" class="inp" placeholder="••••••••"><div class="auth-err" id="lerr">Incorrect email or password.</div></div>
+        <button class="btn-auth" onclick="doLogin()">Sign In</button>
+        <div class="auth-sw">No account? <b onclick="showReg()">Create one free</b></div>
+      </div>
+
+      <div id="rf" style="display:none">
+        <div class="auth-title">Create account</div>
+        <div class="auth-sub">Join TrustWork — free forever</div>
+        <div class="fld"><label>Full Name</label><input type="text" id="rn" class="inp" placeholder="Your full name"></div>
+        <div class="fld"><label>Email</label><input type="email" id="re" class="inp" placeholder="you@example.com"></div>
+        <div class="fld"><label>Password</label><input type="password" id="rp" class="inp" placeholder="Min. 6 characters"><div class="auth-err" id="rerr">Please fill all fields correctly.</div></div>
+        <button class="btn-auth" onclick="doReg()">Create Account</button>
+        <div class="auth-sw">Have an account? <b onclick="showLogin()">Sign in</b></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ APP ════════════════════════════════════ -->
+<div id="app" style="display:none">
+
+  <!-- NAV -->
+  <nav id="appNav">
+    <div class="nav-in">
+      <div class="nav-logo">
+        <svg width="30" height="30" viewBox="0 0 40 40" fill="none">
+          <path d="M20 3L5 9V20C5 29 12 37 20 39C28 37 35 29 35 20V9L20 3Z" fill="#7C3AED"/>
+          <path d="M14 20.5L18 24.5L26 16.5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="27" cy="26" r="5" stroke="white" stroke-width="1.8" fill="rgba(255,255,255,.12)"/>
+          <path d="M31 30L34 33" stroke="white" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <div><div class="nav-logo-txt">Trust<em>Work</em></div><div class="nav-tag">Because every opportunity should be real</div></div>
+      </div>
+      <div class="nav-r">
+        <div class="nav-user-pill">
+          <div class="nav-av" id="navAv">U</div>
+          <span class="nav-uname" id="navNm">User</span>
+        </div>
+        <button class="btn-out" onclick="doLogout()">Sign Out</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- API KEY BANNER -->
+  <div class="api-banner" id="apiBanner">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+    <span id="apiBannerMsg">Gemini API not connected — Enter key to enable AI analysis</span>
+    <input type="password" id="apiBannerKey" placeholder="AIzaSy... paste your free Gemini key here" oninput="checkApiKey()">
+    <button id="apiConnectBtn" onclick="connectApi()">Connect AI</button>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs-bar">
+    <div class="tabs-in">
+      <button class="tbtn on" onclick="switchTab('analyzer',this)" id="t-analyzer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        Job Analyzer
+      </button>
+      <button class="tbtn" onclick="switchTab('dashboard',this)" id="t-dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </button>
+      <button class="tbtn" onclick="switchTab('resume',this)" id="t-resume">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        AI Resume Tool
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ ANALYZER PANEL ══════════════════════ -->
+  <div class="wrap panel on" id="p-analyzer">
+    <div class="grid2">
+
+      <!-- LEFT: INPUT -->
+      <div>
+        <div class="card">
+          <div class="card-hd">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            Job Posting Input
+          </div>
+
+          <div class="fl"><label>Full Job Description Text</label>
+            <textarea class="inp" id="jtxt" placeholder="Paste the complete job posting text here. The more detail you provide, the more accurate the AI analysis..." oninput="liveRisk()"></textarea>
+          </div>
+
+          <!-- NOVELTY #5: Live Risk Ticker -->
+          <div class="live-lbl">Live Risk Signals Detected</div>
+          <div class="live-risk" id="liveRiskRow">
+            <span style="font-size:11px;color:var(--tx3);align-self:center;">Start typing to see live signals...</span>
+          </div>
+
+          <div class="frow mt10">
+            <div class="fl" style="margin-bottom:0"><label>Company Name</label><input type="text" class="inp" id="jco" placeholder="e.g. Amazon India"></div>
+            <div class="fl" style="margin-bottom:0"><label>Salary Offered</label><input type="text" class="inp" id="jsal" placeholder="e.g. 50000/week"></div>
+          </div>
+          <div class="frow mt10">
+            <div class="fl" style="margin-bottom:0"><label>Contact Channel</label>
+              <select class="inp" id="jcon">
+                <option value="">Select...</option>
+                <option value="official">Official Website / Email</option>
+                <option value="whatsapp">WhatsApp Only</option>
+                <option value="gmail">Gmail / Yahoo</option>
+                <option value="telegram">Telegram</option>
+                <option value="none">No Contact Provided</option>
+              </select>
+            </div>
+            <div class="fl" style="margin-bottom:0"><label>Experience Required (Years)</label><input type="number" class="inp" id="jexp" placeholder="0" min="0" max="40"></div>
+          </div>
+          <div class="fl mt10"><label>Job URL (for URL Pattern Analysis)</label><input type="url" class="inp" id="jurl" placeholder="https://... paste the job listing URL"></div>
+
+          <button class="btn-main" id="analyzeBtn" onclick="runAnalysis()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Analyze with AI
+          </button>
+
+          <div class="chips mt10">
+            <div class="chip bad" onclick="loadS(0)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>Fake: WFH Scam</div>
+            <div class="chip bad" onclick="loadS(1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>Fake: Modern Scam</div>
+            <div class="chip good" onclick="loadS(2)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Real: Infosys SE</div>
+            <div class="chip good" onclick="loadS(3)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Real: TCS HR</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: RESULTS -->
+      <div id="rightCol">
+        <div class="card" style="min-height:440px">
+          <div class="card-hd">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Analysis Result
+          </div>
+
+          <!-- PLACEHOLDER -->
+          <div id="rph" class="empty-st">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+            <p style="font-size:13.5px;line-height:1.7">Paste a job posting and click <strong>Analyze with AI</strong><br>to run full AI fraud detection.</p>
+          </div>
+
+          <!-- LOADING -->
+          <div id="rld" style="display:none;text-align:center;padding:30px 16px">
+            <div class="spin"></div>
+            <div style="font-size:14px;font-weight:700;color:var(--tx2)">Running AI Analysis...</div>
+            <div class="load-steps" id="lsteps"></div>
+          </div>
+
+          <!-- RESULTS -->
+          <div id="rres" style="display:none">
+
+            <!-- GAUGE -->
+            <div class="gauge-wrap">
+              <canvas id="gaugeCanvas" width="260" height="160"></canvas>
+              <div class="gauge-center">
+                <div class="gauge-score" id="gScore">0</div>
+                <div class="gauge-label">Fraud Risk</div>
+                <div class="gauge-verdict-label" id="gVerd">Analyzing...</div>
+              </div>
+            </div>
+
+            <!-- VERDICT -->
+            <div id="verdictBox"></div>
+
+            <!-- RADAR -->
+            <div style="margin-bottom:14px">
+              <div class="flags-hd">AI Threat Radar — Multi-Dimensional Analysis</div>
+              <div class="radar-wrap"><canvas id="radarCanvas" width="240" height="240"></canvas></div>
+            </div>
+
+            <!-- FACTOR BARS -->
+            <div class="flags-hd">Detection Factor Scores</div>
+            <div id="factorBars"></div>
+
+            <!-- FLAGS -->
+            <div id="flagsBox"></div>
+
+            <!-- PROCESS TIMELINE -->
+            <div id="timelineBox" style="margin-top:14px"></div>
+
+            <!-- GEMINI AI BOX -->
+            <div id="geminiBox"></div>
+
+            <!-- TEXT ANNOTATION -->
+            <div id="annotBox" style="margin-top:14px"></div>
+
+            <!-- RESUME PROMPT -->
+            <div id="resPrompt" style="display:none">
+              <div class="res-prompt">
+                <div>
+                  <div class="res-prompt-txt">Protect your career — improve your resume</div>
+                  <div class="res-prompt-sub">This job is likely fraudulent. Use AI to optimize your resume for legitimate roles.</div>
+                </div>
+                <button class="btn-res" onclick="goResume()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  Improve Resume
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- AI CALL LOG -->
+        <div class="card mt14" id="aiLogCard" style="display:none">
+          <div class="card-hd">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            Gemini API Live Call Log
+          </div>
+          <div class="ai-log" id="aiLogContent"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ DASHBOARD PANEL ═══════════════════════ -->
+  <div class="wrap panel" id="p-dashboard">
+    <div style="font-size:22px;font-weight:800;color:var(--tx);margin-bottom:4px" id="dashWelcome">Welcome back</div>
+    <div style="font-size:13px;color:var(--tx3);margin-bottom:24px">Your personal job analysis history and statistics</div>
+    <div class="grid4" style="margin-bottom:24px">
+      <div class="stat-card" style="border-top:3px solid var(--p2)"><div class="stat-lbl">Total Scanned</div><div class="stat-val" style="color:var(--p2)" id="dTot">0</div><div class="stat-sub">job postings</div></div>
+      <div class="stat-card" style="border-top:3px solid var(--red)"><div class="stat-lbl">Fake Detected</div><div class="stat-val" style="color:var(--red)" id="dFk">0</div><div class="stat-sub">high risk</div></div>
+      <div class="stat-card" style="border-top:3px solid var(--grn)"><div class="stat-lbl">Safe Verified</div><div class="stat-val" style="color:var(--grn)" id="dSf">0</div><div class="stat-sub">legitimate</div></div>
+      <div class="stat-card" style="border-top:3px solid var(--amb)"><div class="stat-lbl">Avg Risk Score</div><div class="stat-val" style="color:var(--amb)" id="dAv">0</div><div class="stat-sub">out of 100</div></div>
+    </div>
+    <div class="card">
+      <div class="card-hd">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Analysis History
+        <button style="margin-left:auto;padding:5px 12px;border:1.5px solid var(--bdr2);background:transparent;border-radius:7px;font-size:11.5px;font-weight:600;color:var(--tx3);cursor:pointer" onclick="clearHist()">Clear</button>
+      </div>
+      <div id="histWrap">
+        <div class="empty-st"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><p>No analyses yet — go to <strong>Job Analyzer</strong> to scan your first posting.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ RESUME PANEL ═══════════════════════════ -->
+  <div class="wrap panel" id="p-resume">
+    <div class="res-hero">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:14px">
+        <div>
+          <h1>AI Resume Improvement Tool</h1>
+          <p>Gemini AI evaluates your resume section by section — ATS score, keyword gaps, structure, and a fully rewritten professional summary tailored to your target role.</p>
+          <div class="res-badges">
+            <span class="rbadge">ATS Score Analysis</span>
+            <span class="rbadge">Keyword Gap Detection</span>
+            <span class="rbadge">Section-by-Section Feedback</span>
+            <span class="rbadge">AI Professional Rewrite</span>
+          </div>
+        </div>
+        <div style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);border-radius:12px;padding:14px 20px;text-align:center">
+          <div style="font-size:26px;font-weight:800;font-family:var(--mono)">AI</div>
+          <div style="font-size:10px;opacity:.8;margin-top:1px">Gemini Powered</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div>
+        <div class="card">
+          <div class="card-hd"><div class="dot"></div>Resume Input</div>
+          <div class="fl"><label>Paste Your Resume Text</label><textarea class="inp" id="rTxt" style="min-height:200px" placeholder="Paste your full resume here. Include name, contact, education, work experience, skills, certifications..."></textarea></div>
+          <div class="fl"><label>Target Job Role</label><input type="text" class="inp" id="rRole" placeholder="e.g. Software Engineer, Data Analyst, HR Executive"></div>
+          <div class="fl"><label>Target Job Description (Strongly Recommended)</label><textarea class="inp" style="min-height:90px" id="rJD" placeholder="Paste the job description. This lets Gemini AI identify exact missing keywords and tailor suggestions to this specific role..."></textarea></div>
+          <div class="fl">
+            <label>Your Key Skills</label>
+            <div id="skillTagWrap" style="min-height:32px;display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px"></div>
+            <div class="add-skill-row">
+              <input type="text" class="skill-inp" id="skInp" placeholder="Type skill, press Enter or Add" onkeydown="if(event.key==='Enter')addSkill()">
+              <button class="btn-addsk" onclick="addSkill()">Add</button>
+            </div>
+          </div>
+          <button class="btn-main" id="resumeBtn" onclick="runResume()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            Analyze and Improve Resume
+          </button>
+          <div class="mt6" style="font-size:11.5px;color:var(--tx3)">Requires Gemini API key connected above. Uses gemini-1.5-flash with temperature 0.2.</div>
+        </div>
+
+        <!-- SAMPLE BAD RESUMES -->
+        <div class="card mt14">
+          <div class="card-hd"><div class="dot"></div>Sample Weak Resumes to Test</div>
+          <div style="font-size:12px;color:var(--tx3);margin-bottom:10px">Click any sample to load it and see how AI improves it</div>
+          <div class="chips">
+            <div class="chip bad" onclick="loadBadResume(0)">Fresher with no impact verbs</div>
+            <div class="chip bad" onclick="loadBadResume(1)">Generic skills, no metrics</div>
+            <div class="chip bad" onclick="loadBadResume(2)">Poor formatting, wrong keywords</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="resumeOutput">
+        <div class="card" style="min-height:320px">
+          <div class="card-hd"><div class="dot"></div>AI Evaluation</div>
+          <div id="rph2" class="empty-st">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <p>Paste your resume and click <strong>Analyze and Improve</strong></p>
+          </div>
+          <div id="rld2" style="display:none;text-align:center;padding:30px 16px">
+            <div class="spin"></div>
+            <div style="font-size:14px;font-weight:700;color:var(--tx2)">Gemini AI is evaluating your resume...</div>
+            <div style="font-size:12px;color:var(--tx3);margin-top:8px;font-family:var(--mono)">Checking ATS, keywords, structure, impact...</div>
+          </div>
+          <div id="rout" style="display:none"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<!-- TOAST -->
+<div class="toast" id="toast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span id="toastMsg">Done</span></div>
+
+<script>
+// ════════════════════════════════════════════════════════
+//  GLOBAL STATE
+// ════════════════════════════════════════════════════════
+let CU = null;        // current user
+let GK = '';          // gemini api key
+let skills = [];
+let logLines = [];
+
+// ════════════════════════════════════════════════════════
+//  SAMPLE DATA
+// ════════════════════════════════════════════════════════
+const SAMPLES = [
+  { co:'Amazon Fulfilment India (FAKE)', sal:'50000 per week', con:'whatsapp', exp:'0', url:'', txt:`URGENT HIRING - Work From Home Data Entry at Amazon Fulfilment India!
+
+Earn Rs.50,000 per week working just 2 hours daily from home! No experience needed, no qualification required. Simple form filling and product listing work.
+
+EARN Rs.50,000 PER WEEK GUARANTEED
+IMMEDIATE JOINING — TODAY ONLY
+DAILY PAYMENT via PhonePe
+
+Requirements: Just a smartphone!
+
+Process: Pay one-time registration fee of Rs.1,999 to get your starter kit. Amount is fully refundable after 30 days.
+
+Contact ASAP — only 20 seats left! WhatsApp NOW: 9876543210
+
+This is 100% genuine offer from Amazon India. Slots filling fast! Do not miss this opportunity!` },
+
+  { co:'Digital Earn Solutions', sal:'1500 per task', con:'telegram', exp:'0', url:'https://bit.ly/earn-jobs-2026', txt:`Hi, This is a part-time remote opportunity for serious candidates.
+
+We are a digital marketing firm looking for Social Media Evaluators and Task Completors. Professional work, decent pay, flexible hours.
+
+Compensation: Rs.800-1500 per completed task
+Work Hours: 2-3 hours daily, completely flexible
+Location: 100% remote, work from anywhere
+
+Requirements: Smartphone, basic internet knowledge. No prior experience required.
+
+How to apply: Message our Telegram coordinator to get the application form and onboarding details. Small refundable security deposit of Rs.999 required to confirm commitment.
+
+Telegram: @digitalearnjobs2026
+Note: Only serious candidates apply. 12 positions remaining.` },
+
+  { co:'Infosys Limited', sal:'22 LPA', con:'official', exp:'3', url:'https://careers.infosys.com', txt:`Senior Software Engineer — React (Ref: INF-2026-SE-4521)
+
+Infosys Limited is hiring for our Digital Experience Practice in Bangalore.
+
+Role: Senior Software Engineer
+Experience: 3-5 years minimum
+Location: Bangalore (Hybrid — 3 days office)
+Salary: 18-26 LPA depending on experience
+
+Required Skills: React.js 3+ years, TypeScript, Node.js, REST APIs, Agile methodology
+Qualification: B.E or B.Tech in Computer Science
+
+Apply exclusively at: careers.infosys.com/job/INF-2026-SE-4521
+
+Infosys never charges candidates any fees. Report fraud at integrity@infosys.com
+Application closes: April 30, 2026` },
+
+  { co:'Tata Consultancy Services', sal:'5.2 LPA', con:'official', exp:'2', url:'https://careers.tcs.com', txt:`Job ID: TCS-HR-CHN-2026-891
+HR Executive — Chennai
+
+Company: Tata Consultancy Services Ltd
+Salary: 4.5-6 LPA plus benefits
+Experience: 1-3 years in HR
+Qualification: MBA HR or PGDM
+
+Responsibilities: Recruitment coordination, employee onboarding, HRMS management (SAP SuccessFactors), statutory compliance.
+
+Skills: Strong communication, MS Office, Indian labor law knowledge
+
+Apply: careers.tcs.com/jobs/TCS-HR-CHN-2026-891
+Email queries: recruitment.chennai@tcs.com
+
+TCS does NOT charge any fees. Report impersonators immediately.` }
+];
+
+const BAD_RESUMES = [
+  { role:'Software Engineer', jd:'Looking for a software engineer with Python, Django, REST API, and cloud experience.', txt:`Rahul Kumar
+rahul.kumar@gmail.com | 9876543210 | Chennai
+
+Objective: I want to get a good job in a reputed company where I can use my skills and grow.
+
+Education:
+B.Tech Computer Science — SRM Institute — 2024 — 7.2 CGPA
+
+Skills:
+Computers, internet, MS Office, some Python, teamwork, communication, hard working
+
+Work Experience:
+Intern at a software company (2 months)
+- Worked on a project
+- Helped the team
+- Learned new things
+
+Projects:
+- Library management system
+- Todo app
+
+Languages: English, Tamil, Hindi
+
+Hobbies: Cricket, reading, browsing internet
+
+References: Available on request` },
+
+  { role:'Data Analyst', jd:'Seeking data analyst with SQL, Python, Tableau, Power BI, statistical analysis and business intelligence skills.', txt:`Priya Singh
+priya@yahoo.com
+
+Summary: Hardworking person who wants to work as data analyst. I know Excel and some data tools.
+
+Education: B.Sc Statistics 2023
+
+Experience:
+Company Name (6 months)
+Did data entry work
+Made some reports in Excel
+
+Skills: MS Excel, PowerPoint, internet, basic SQL
+
+Certifications: Data science course from YouTube
+
+Extra: Good at numbers. Fast learner. Team player.
+
+Contact: Available anytime.` },
+
+  { role:'HR Executive', jd:'HR Executive needed with recruitment, onboarding, payroll, HR policies, HRMS knowledge and interpersonal skills.', txt:`Ananya Sharma
+ananya_hr@gmail.com
+
+About Me: I recently completed my MBA and looking for HR job. I am a people person and love interacting with others.
+
+Education: MBA HR — 2024 — Private College
+
+Training: 3 months HR internship
+
+Things I Can Do: Interviewing people, making offer letters, attendance, taking care of new joiners, being nice to employees, handling issues
+
+Technical: MS Word, Excel, basics
+
+Why Hire Me: I am dedicated and sincere. I will work hard and learn fast. I am a quick learner and can adapt to any environment easily.` }
+];
+
+function loadS(i) {
+  const s = SAMPLES[i];
+  document.getElementById('jtxt').value = s.txt;
+  document.getElementById('jco').value = s.co;
+  document.getElementById('jsal').value = s.sal;
+  document.getElementById('jcon').value = s.con;
+  document.getElementById('jexp').value = s.exp;
+  document.getElementById('jurl').value = s.url;
+  liveRisk();
+  toast('Sample loaded. Click Analyze with AI.','ok');
+}
+
+function loadBadResume(i) {
+  const r = BAD_RESUMES[i];
+  document.getElementById('rTxt').value = r.txt;
+  document.getElementById('rRole').value = r.role;
+  document.getElementById('rJD').value = r.jd;
+  toast('Weak resume loaded. Click Analyze and Improve.','ok');
+}
+
+// ════════════════════════════════════════════════════════
+//  AUTH
+// ════════════════════════════════════════════════════════
+function getUsers() { return JSON.parse(localStorage.getItem('tw_u')||'{}'); }
+function saveUsers(u) { localStorage.setItem('tw_u',JSON.stringify(u)); }
+function uKey(e) { return 'tw_h_'+btoa(e).replace(/=/g,''); }
+
+function doLogin() {
+  const e=document.getElementById('le').value.trim(), p=document.getElementById('lp').value;
+  const err=document.getElementById('lerr');
+  err.style.display='none';
+  const u=getUsers();
+  if(!u[e]||u[e].pw!==p){ err.style.display='block'; return; }
+  CU={email:e,name:u[e].name};
+  launchApp();
+}
+function doReg() {
+  const n=document.getElementById('rn').value.trim(), e=document.getElementById('re').value.trim(), p=document.getElementById('rp').value;
+  const err=document.getElementById('rerr');
+  err.style.display='none';
+  if(!n||!e||p.length<6||!e.includes('@')){ err.style.display='block'; return; }
+  const u=getUsers(); u[e]={name:n,pw:p}; saveUsers(u);
+  CU={email:e,name:n};
+  launchApp();
+}
+function doLogout() {
+  CU=null; GK='';
+  document.getElementById('app').style.display='none';
+  document.getElementById('authWall').style.display='flex';
+  showLogin();
+  resetAnalyzer();
+}
+function launchApp() {
+  document.getElementById('authWall').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('navAv').textContent=CU.name[0].toUpperCase();
+  document.getElementById('navNm').textContent=CU.name.split(' ')[0];
+  document.getElementById('dashWelcome').textContent='Welcome back, '+CU.name.split(' ')[0];
+  // Restore saved API key if any
+  const saved = localStorage.getItem('tw_gk_'+CU.email);
+  if(saved){ document.getElementById('apiBannerKey').value=saved; GK=saved; updateBanner(true); }
+  renderDash();
+}
+function showReg() { document.getElementById('lf').style.display='none'; document.getElementById('rf').style.display='block'; }
+function showLogin() { document.getElementById('lf').style.display='block'; document.getElementById('rf').style.display='none'; }
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('lp').onkeydown=e=>{ if(e.key==='Enter')doLogin(); };
+  document.getElementById('le').onkeydown=e=>{ if(e.key==='Enter')doLogin(); };
+  document.getElementById('rp').onkeydown=e=>{ if(e.key==='Enter')doReg(); };
+});
+
+// ════════════════════════════════════════════════════════
+//  API KEY BANNER
+// ════════════════════════════════════════════════════════
+function connectApi() {
+  const key = document.getElementById('apiBannerKey').value.trim();
+  if(!key||!key.startsWith('AIza')){ toast('Enter a valid Gemini API key starting with AIza','err'); return; }
+  GK = key;
+  if(CU) localStorage.setItem('tw_gk_'+CU.email, key);
+  updateBanner(true);
+  toast('Gemini AI connected! Full AI analysis now enabled.','ok');
+}
+function checkApiKey() {
+  const v = document.getElementById('apiBannerKey').value.trim();
+  if(v.startsWith('AIza') && v.length > 20){ GK=v; updateBanner(true); }
+  else if(!v){ GK=''; updateBanner(false); }
+}
+function updateBanner(connected) {
+  const b=document.getElementById('apiBanner');
+  const m=document.getElementById('apiBannerMsg');
+  const btn=document.getElementById('apiConnectBtn');
+  if(connected){
+    b.classList.add('connected');
+    m.textContent='Gemini AI connected — Full AI analysis active';
+    btn.textContent='Connected';
+  } else {
+    b.classList.remove('connected');
+    m.textContent='Gemini API not connected — Enter key to enable AI analysis';
+    btn.textContent='Connect AI';
+  }
+}
+
+// ════════════════════════════════════════════════════════
+//  TAB SWITCHING
+// ════════════════════════════════════════════════════════
+function switchTab(name,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('on'));
+  document.getElementById('p-'+name).classList.add('on');
+  btn.classList.add('on');
+  if(name==='dashboard') renderDash();
+}
+function goResume(){
+  switchTab('resume',document.getElementById('t-resume'));
+  document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('on'));
+  document.getElementById('t-resume').classList.add('on');
+}
+
+// ════════════════════════════════════════════════════════
+//  LIVE RISK TICKER
+// ════════════════════════════════════════════════════════
+const FP = {
+  fee:['registration fee','joining fee','pay rs','pay inr','refundable deposit','security deposit','training fee','kit fee','activation fee'],
+  urgency:['urgent','limited seats','hurry','only today','last chance','immediate joining','slots filling','only 20 seats','today only','midnight','act fast'],
+  vague:['no experience needed','no qualification required','anyone can do','no skills needed','just smartphone','just a smartphone','earn from mobile'],
+  salary:['per week','per day','guaranteed income','guaranteed payment','guaranteed earning','earn lakhs'],
+  contact_flag:['whatsapp','telegram','t.me/','@gmail.com','yahoo.com'],
+};
+function liveRisk() {
+  const t = (document.getElementById('jtxt').value||'').toLowerCase();
+  const row = document.getElementById('liveRiskRow');
+  if(!t.trim()){ row.innerHTML='<span style="font-size:11px;color:var(--tx3);align-self:center">Start typing to see live signals...</span>'; return; }
+  const found=[];
+  FP.fee.forEach(k=>{ if(t.includes(k)) found.push({cls:'rp-fee',lbl:'FEE DEMAND: '+k}); });
+  FP.urgency.forEach(k=>{ if(t.includes(k)) found.push({cls:'rp-urg',lbl:'URGENCY: '+k}); });
+  FP.salary.forEach(k=>{ if(t.includes(k)) found.push({cls:'rp-sal',lbl:'SALARY: '+k}); });
+  FP.vague.forEach(k=>{ if(t.includes(k)) found.push({cls:'rp-vag',lbl:'VAGUE: '+k}); });
+  FP.contact_flag.forEach(k=>{ if(t.includes(k)) found.push({cls:'rp-urg',lbl:'CONTACT: '+k}); });
+  if(!found.length){ row.innerHTML='<span class="risk-pill rp-ok show">No obvious red flags detected yet</span>'; return; }
+  const shown = [...new Map(found.map(f=>[f.lbl,f])).values()].slice(0,8);
+  row.innerHTML = shown.map(f=>`<span class="risk-pill ${f.cls} show">${f.lbl}</span>`).join('');
+}
+
+// ════════════════════════════════════════════════════════
+//  LOCAL RULE ENGINE
+// ════════════════════════════════════════════════════════
+const LEGIT_D=['tcs.com','infosys.com','wipro.com','hcl.com','cognizant.com','accenture.com','google.com','microsoft.com','linkedin.com','naukri.com','shine.com','indeed.com','glassdoor.com','amazon.jobs'];
+const LEGIT_CO=['tata consultancy','infosys limited','wipro technologies','hcl technologies','cognizant technology','accenture india','google india','microsoft india'];
+
+function runLocal(txt,co,sal,con,exp,url) {
+  const lt=(txt+' '+co+' '+sal).toLowerCase(), lu=(url||'').toLowerCase();
+  let sc={fee:0,urgency:0,salary:0,contact:0,vagueness:0,impersonation:0,url_risk:0};
+
+  FP.fee.forEach(k=>{ if(lt.includes(k)) sc.fee=Math.min(100,sc.fee+28); });
+  FP.urgency.forEach(k=>{ if(lt.includes(k)) sc.urgency=Math.min(100,sc.urgency+18); });
+  ['100% genuine','no fraud','real opportunity','limited slots','only 15 seats','only 20 seats'].forEach(k=>{ if(lt.includes(k)) sc.urgency=Math.min(100,sc.urgency+10); });
+  FP.salary.forEach(k=>{ if(lt.includes(k)) sc.salary=Math.min(100,sc.salary+22); });
+  const sn=sal?(sal.match(/\d+/)||['0'])[0]:'0'; const sv=parseInt(sn);
+  if((lt.includes('/week')||lt.includes('per week'))&&sv>20000) sc.salary=Math.max(sc.salary,88);
+  if((lt.includes('/day')||lt.includes('per day'))&&sv>5000) sc.salary=Math.max(sc.salary,82);
+  const cm={whatsapp:80,telegram:85,gmail:65,none:60,official:5};
+  sc.contact=cm[con]||28;
+  FP.contact_flag.forEach(k=>{ if(lt.includes(k)) sc.contact=Math.min(100,sc.contact+18); });
+  FP.vague.forEach(k=>{ if(lt.includes(k)) sc.vagueness=Math.min(100,sc.vagueness+28); });
+  const expN=parseInt(exp)||0;
+  if(expN===0&&sc.fee>20) sc.vagueness=Math.min(100,sc.vagueness+20);
+  const isLegitN=LEGIT_CO.some(c=>lt.includes(c));
+  sc.impersonation = isLegitN&&(sc.fee>0||con==='whatsapp'||con==='gmail') ? 95 : (!isLegitN&&con!=='official') ? 35 : 5;
+  if(lu){ if(lu.includes('bit.ly')||lu.includes('tinyurl')||lu.includes('shorturl')) sc.url_risk=88; else if(!LEGIT_D.some(d=>lu.includes(d))) sc.url_risk=lu.match(/amazon-india|tcs-jobs|infosys-hiring|earnmoney/) ? 92 : 30; else sc.url_risk=5; } else sc.url_risk=18;
+  const W={fee:.27,urgency:.15,salary:.17,contact:.13,vagueness:.10,impersonation:.11,url_risk:.07};
+  let tot=0; for(let k in W) tot+=sc[k]*W[k];
+  const flags=[];
+  if(sc.fee>20) flags.push({t:'Payment/fee demanded — legitimate employers NEVER charge candidates',s:'red'});
+  if(sc.urgency>30) flags.push({t:'High-pressure urgency language — artificial scarcity tactic',s:'red'});
+  if(sc.salary>50) flags.push({t:'Salary claim far exceeds realistic market rates for this role type',s:'red'});
+  if(sc.contact>50) flags.push({t:'Contact only via personal messaging apps — no official channel',s:'amber'});
+  if(sc.vagueness>30) flags.push({t:'Zero qualifications required — designed to attract desperate candidates',s:'amber'});
+  if(sc.impersonation>60) flags.push({t:'Known company name + scam signals = likely impersonation fraud',s:'red'});
+  if(sc.url_risk>50&&url) flags.push({t:'URL does not match official company domain — possible phishing link',s:'amber'});
+  return {total:Math.round(tot),scores:sc,flags};
+}
+
+// ════════════════════════════════════════════════════════
+//  GEMINI API CALL
+// ════════════════════════════════════════════════════════
+function addLog(msg, cls='') {
+  const ts = new Date().toLocaleTimeString('en-IN',{hour12:false});
+  logLines.push(`<span class="log-ts">[${ts}]</span> <span class="${cls}">${msg}</span>`);
+  const el = document.getElementById('aiLogContent');
+  if(el) el.innerHTML = logLines.join('\n');
+  if(el) el.scrollTop = el.scrollHeight;
+}
+
+async function callGeminiJob(txt,co,sal,con,exp,url,localScore) {
+  if(!GK) return null;
+  addLog('Initializing Gemini 1.5 Flash connection...','log-step');
+  addLog(`Payload: job text (${txt.length} chars) + 6 metadata fields + local pre-score`,'log-send');
+  addLog('Applying prompt engineering: persona injection + 8-signal enumeration + modern scam instructions + JSON schema enforcement...','log-step');
+
+  const prompt=`You are a senior fraud detection specialist with 15 years of experience analyzing fake job scams in India. Analyze this job posting with extreme precision.
+
+JOB TEXT:
+"""
+${txt.substring(0, 3000)}
+"""
+
+METADATA:
+- Company: ${co||'Not stated'}
+- Salary: ${sal||'Not stated'}
+- Contact channel: ${con||'Not stated'}
+- Experience required: ${exp||'Not stated'} years
+- URL: ${url||'None provided'}
+- Rule engine pre-score: ${localScore}/100
+
+CRITICAL ANALYSIS INSTRUCTIONS:
+You must check ALL of these 8 signal categories:
+1. FEE DEMAND: Any payment required from candidate? (registration, joining, training, kit, security deposit)
+2. SALARY REALISM: Is the salary realistic for India job market? Compare to actual market rates.
+3. URGENCY MANIPULATION: Artificial scarcity, pressure language, time limits, "limited seats"?
+4. CONTACT LEGITIMACY: Official channels vs personal WhatsApp/Gmail/Telegram?
+5. QUALIFICATION GATES: Zero requirements to attract desperate/vulnerable candidates?
+6. COMPANY IMPERSONATION: Known brand name used with scam signals?
+7. MODERN SCAM PATTERNS: Even professional-looking posts can be scams. Check:
+   - Vague job responsibilities despite formal language
+   - No verifiable company registration or official website
+   - Slightly-above-market salary to appear credible but still unrealistic
+   - URL shorteners or non-official domains
+   - "Refundable" deposit framing
+8. LANGUAGE PATTERNS: "Guaranteed income", "work from home unlimited", "no experience needed"
+
+IMPORTANT: Modern scams have evolved to look legitimate. Be especially suspicious of posts that seem professional but have ANY combination of: informal contact + vague responsibilities + no official verification path.
+
+Respond ONLY in this exact JSON (no markdown, no text outside JSON):
+{
+  "verdict": "FAKE" or "SUSPICIOUS" or "LEGITIMATE",
+  "confidence": "HIGH" or "MEDIUM" or "LOW",
+  "final_score": <integer 0-100>,
+  "key_reason": "<one precise sentence — the single strongest signal>",
+  "detailed_reasoning": "<3-4 sentences of deep analytical reasoning>",
+  "red_flags": ["<specific flag 1>","<specific flag 2>","<specific flag 3>"],
+  "safe_signals": ["<signal if legitimate, else 'None'>"],
+  "advice": "<one specific, actionable sentence for the job seeker>",
+  "modern_pattern": "<name a specific modern scam pattern this matches, or 'None'>",
+  "annotate_fee": ["<exact phrase from text that is a fee demand, or empty array>"],
+  "annotate_urgency": ["<exact urgency phrase from text, or empty array>"],
+  "annotate_vague": ["<exact vague phrase from text, or empty array>"],
+  "annotate_salary": ["<exact unrealistic salary phrase from text, or empty array>"],
+  "process_check": {
+    "clear_job_title": true or false,
+    "specific_responsibilities": true or false,
+    "qualification_stated": true or false,
+    "official_contact": true or false,
+    "no_fee_required": true or false,
+    "verifiable_company": true or false
+  }
+}`;
+
+  addLog('Sending request to Gemini API...','log-send');
+  const t0=performance.now();
+  try {
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GK}`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.08,maxOutputTokens:1200}})
+    });
+    if(!res.ok){ 
+      const errText = await res.text();
+      addLog(`HTTP Error ${res.status}: ${errText.substring(0, 200)}`,'log-err'); 
+      throw new Error('HTTP '+res.status); 
+    }
+    const data=await res.json();
+    const ms=Math.round(performance.now()-t0);
+    addLog(`Response received in ${ms}ms`,'log-ok');
+    const raw=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
+    addLog(`Raw response length: ${raw.length} characters`,'log-recv');
+    const cleaned=raw.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();
+    const parsed=JSON.parse(cleaned);
+    addLog(`JSON parsed successfully — verdict: ${parsed.verdict} | confidence: ${parsed.confidence} | score: ${parsed.final_score}`,'log-ok');
+    addLog(`Model: gemini-1.5-flash | temp: 0.08`,'log-step');
+    return parsed;
+  } catch(e) {
+    addLog(`Error: ${e.message}`,'log-err');
+    if(e.message.includes('403')) addLog('403 Forbidden — API key invalid or Gemini API not enabled','log-err');
+    if(e.message.includes('429')) addLog('429 Rate limit — wait 60 seconds and try again','log-err');
+    return null;
+  }
+}
+
+// ════════════════════════════════════════════════════════
+//  MAIN ANALYSIS FLOW
+// ════════════════════════════════════════════════════════
+async function runAnalysis() {
+  const txt=document.getElementById('jtxt').value.trim();
+  if(!txt){ toast('Please paste a job posting first.','err'); return; }
+  if(!GK){ toast('Please connect your Gemini API key in the banner above for AI analysis.','err'); return; }
+  const co=document.getElementById('jco').value.trim();
+  const sal=document.getElementById('jsal').value.trim();
+  const con=document.getElementById('jcon').value;
+  const exp=document.getElementById('jexp').value;
+  const url=document.getElementById('jurl').value.trim();
+
+  document.getElementById('analyzeBtn').disabled=true;
+  document.getElementById('rph').style.display='none';
+  document.getElementById('rres').style.display='none';
+  document.getElementById('rld').style.display='block';
+  document.getElementById('aiLogCard').style.display='block';
+  logLines=[];
+  document.getElementById('aiLogContent').innerHTML='';
+
+  const steps=[
+    'Preprocessing and tokenizing job text...',
+    'Running 7-factor rule-based classifier...',
+    'Extracting salary anomaly signals...',
+    'Analyzing URL legitimacy pattern...',
+    'Building structured Gemini prompt (6 engineering techniques)...',
+    'Calling Gemini 1.5 Flash API (temperature: 0.08)...',
+    'Parsing structured JSON response...',
+    'Rendering threat analysis and annotations...'
+  ];
+  const stepEl=document.getElementById('lsteps');
+  stepEl.innerHTML='';
+
+  // Run local engine immediately
+  const local=runLocal(txt,co,sal,con,exp,url);
+  addLog('Rule engine initialized — 7 fraud factors + weighted scoring','log-step');
+
+  // Animate steps
+  for(let i=0;i<steps.length;i++){
+    await new Promise(r=>setTimeout(r,320));
+    const d=document.createElement('div');
+    d.className='lstep '+(i===steps.length-1?'live':'done');
+    d.innerHTML=`<div class="ldot"></div>${steps[i]}`;
+    stepEl.appendChild(d);
+    if(i>0) stepEl.children[i-1].className='lstep done';
+  }
+
+  // Run Gemini
+  const ai=await callGeminiJob(txt,co,sal,con,exp,url,local.total);
+  await new Promise(r=>setTimeout(r,200));
+
+  const finalScore=ai?ai.final_score:local.total;
+  const verdict=ai?ai.verdict:(local.total>=70?'FAKE':local.total>=40?'SUSPICIOUS':'LEGITIMATE');
+
+  document.getElementById('rld').style.display='none';
+  document.getElementById('rres').style.display='block';
+
+  renderResult(finalScore,verdict,local,ai,txt,co);
+  saveHist(finalScore,verdict,co||'Unknown',txt.substring(0,80)+'...');
+  document.getElementById('analyzeBtn').disabled=false;
+}
+
+// ════════════════════════════════════════════════════════
+//  RENDER RESULTS
+// ════════════════════════════════════════════════════════
+function renderResult(score,verdict,local,ai,txt,co) {
+  const sc = score;
+  const color = sc>=70?'#DC2626':sc>=40?'#D97706':'#059669';
+
+  // GAUGE
+  drawGauge(sc, color, verdict);
+
+  // VERDICT BOX
+  const VM = {
+    FAKE:{ cls:'fake', icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`, title:'HIGH RISK — Likely Fraudulent', desc:ai?ai.key_reason:'This posting shows strong fraud indicators. Do not pay any fees or share personal documents.' },
+    SUSPICIOUS:{ cls:'sus', icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`, title:'SUSPICIOUS — Proceed with Caution', desc:ai?ai.key_reason:'Several red flags detected. Verify independently before proceeding.' },
+    LEGITIMATE:{ cls:'ok', icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`, title:'LOW RISK — Appears Legitimate', desc:ai?ai.key_reason:'This posting shows characteristics of a genuine job listing. Always verify at official company website.' }
+  };
+  const v=VM[verdict]||VM.SUSPICIOUS;
+  document.getElementById('verdictBox').innerHTML=`<div class="vbox ${v.cls}"><div class="vbox-icon">${v.icon}</div><div><div class="vbox-title">${v.title}</div><div class="vbox-desc">${v.desc}</div></div></div>`;
+
+  // RADAR CHART
+  const radarData=[
+    local.scores.fee, local.scores.urgency, local.scores.salary,
+    local.scores.contact, local.scores.vagueness,
+    local.scores.impersonation, local.scores.url_risk
+  ];
+  const radarLabels=['Fee\nDemand','Urgency\nLang','Salary\nAnomaly','Contact\nRisk','Vague\nReq','Company\nImpersonate','URL\nRisk'];
+  drawRadar(radarData, radarLabels, color);
+
+  // FACTOR BARS
+  const FD=[
+    {k:'fee',l:'Fee Demand Detection',c:'#DC2626'},
+    {k:'urgency',l:'Urgency Language',c:'#D97706'},
+    {k:'salary',l:'Salary Anomaly',c:'#2563EB'},
+    {k:'contact',l:'Contact Channel Risk',c:'#D97706'},
+    {k:'vagueness',l:'Vague Requirements',c:'#7C3AED'},
+    {k:'impersonation',l:'Company Impersonation',c:'#DC2626'},
+    {k:'url_risk',l:'URL Legitimacy',c:'#059669'},
+  ];
+  document.getElementById('factorBars').innerHTML=FD.map(f=>{
+    const v=local.scores[f.k]||0;
+    return `<div class="fbar-row"><div class="fbar-hd"><span class="fbar-name">${f.l}</span><span class="fbar-val" style="color:${f.c}">${v}%</span></div><div class="fbar-track"><div class="fbar-fill" id="fb-${f.k}" style="width:0%;background:${f.c}"></div></div></div>`;
+  }).join('');
+  setTimeout(()=>FD.forEach(f=>{ const el=document.getElementById('fb-'+f.k); if(el) el.style.width=(local.scores[f.k]||0)+'%'; }),80);
+
+  // FLAGS
+  const allFlags=[...local.flags];
+  if(ai&&ai.red_flags) ai.red_flags.forEach(rf=>{ if(!allFlags.some(f=>f.t.toLowerCase().includes(rf.toLowerCase().substring(0,15)))) allFlags.push({t:rf,s:'red'}); });
+  document.getElementById('flagsBox').innerHTML = allFlags.length ? `<div class="flags-section"><div class="flags-hd">Detected Signals (${allFlags.length})</div>${allFlags.map(f=>`<div class="flag"><div class="fdot" style="background:${f.s==='red'?'var(--red)':'var(--amb)'}"></div><span>${f.t}</span></div>`).join('')}</div>` : '';
+
+  // TIMELINE
+  if(ai&&ai.process_check) {
+    const PC=ai.process_check;
+    const checks=[
+      {k:'clear_job_title',l:'Clear job title and role',g:'Has clear position title',b:'No clear job title defined'},
+      {k:'specific_responsibilities',l:'Specific job responsibilities',g:'Specific duties mentioned',b:'Vague or no responsibilities listed'},
+      {k:'qualification_stated',l:'Qualification requirements stated',g:'Education/experience requirements clear',b:'No qualifications required — red flag'},
+      {k:'official_contact',l:'Official contact channels',g:'Official email/website provided',b:'Only personal messaging app contact'},
+      {k:'no_fee_required',l:'No fees from candidate',g:'No payment required from applicant',b:'Candidate required to pay — FRAUD signal'},
+      {k:'verifiable_company',l:'Verifiable company presence',g:'Company can be verified online',b:'Company cannot be independently verified'},
+    ];
+    document.getElementById('timelineBox').innerHTML=`
+      <div class="flags-hd" style="margin-bottom:8px">Legitimate Job Checklist — AI Process Verification</div>
+      <div class="timeline">${checks.map(c=>`
+        <div class="tl-item ${PC[c.k]?'ok':'bad'}">
+          <div class="tl-dot"></div>
+          <div class="tl-title">${c.l}</div>
+          <div class="tl-desc">${PC[c.k]?c.g:c.b}</div>
+        </div>`).join('')}
+      </div>`;
+  }
+
+  // GEMINI AI BOX
+  if(ai) {
+    document.getElementById('geminiBox').innerHTML=`<div class="gemini-box">
+      <div class="gemini-hd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Gemini 1.5 Flash — AI Deep Analysis</div>
+      <div class="gemini-row">
+        <div class="gemini-kv"><div class="gemini-k">Verdict</div><div class="gemini-v" style="color:${ai.verdict==='FAKE'?'var(--red)':ai.verdict==='SUSPICIOUS'?'var(--amb)':'var(--grn)'}">${ai.verdict}</div></div>
+        <div class="gemini-kv"><div class="gemini-k">Confidence</div><div class="gemini-v">${ai.confidence}</div></div>
+        <div class="gemini-kv"><div class="gemini-k">AI Score</div><div class="gemini-v">${ai.final_score}/100</div></div>
+        <div class="gemini-kv"><div class="gemini-k">Scam Pattern</div><div class="gemini-v" style="font-size:11px">${ai.modern_pattern}</div></div>
+      </div>
+      <div class="gemini-text" style="margin-bottom:8px">${ai.detailed_reasoning}</div>
+      <div class="gemini-text" style="background:rgba(255,255,255,.7);border-radius:6px;padding:8px 10px;font-weight:600;color:var(--pd)">Advice: ${ai.advice}</div>
+    </div>`;
+  } else {
+    document.getElementById('geminiBox').innerHTML=`<div class="gemini-box"><div class="gemini-hd">Gemini API Not Connected</div><div class="gemini-text">Connect your free Gemini API key in the top banner to enable full AI deep analysis. Get a free key at <a href="https://ai.google.dev" target="_blank">ai.google.dev</a> (2 minutes).</div></div>`;
+  }
+
+  // TEXT ANNOTATION
+  if(ai && (ai.annotate_fee||ai.annotate_urgency||ai.annotate_vague||ai.annotate_salary)) {
+    let annotatedTxt = txt;
+    const escape = s => s.replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
+    const hlPhrases = (t,phrases,cls) => {
+      if(!phrases||!phrases.length) return t;
+      phrases.forEach(p=>{ if(!p||p.length<3) return;
+        const re=new RegExp(p.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi');
+        t=t.replace(re,m=>`<mark class="${cls}">${escape(m)}</mark>`);
+      });
+      return t;
+    };
+    let ht=escape(annotatedTxt);
+    ht=hlPhrases(ht,ai.annotate_fee,'ann-fee');
+    ht=hlPhrases(ht,ai.annotate_urgency,'ann-urgency');
+    ht=hlPhrases(ht,ai.annotate_vague,'ann-vague');
+    ht=hlPhrases(ht,ai.annotate_salary,'ann-salary');
+    document.getElementById('annotBox').innerHTML=`
+      <div class="flags-hd">AI Text Annotation — Highlighted Red Flags</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+        <span style="font-size:11px;padding:2px 8px;background:#FEE2E2;border-radius:4px;color:#991B1B">Fee Demand</span>
+        <span style="font-size:11px;padding:2px 8px;background:#FEF3C7;border-radius:4px;color:#92400E">Urgency Language</span>
+        <span style="font-size:11px;padding:2px 8px;background:#EDE9FE;border-radius:4px;color:#4C1D95">Vague Claims</span>
+        <span style="font-size:11px;padding:2px 8px;background:#DBEAFE;border-radius:4px;color:#1E40AF">Salary Anomaly</span>
+      </div>
+      <div class="annotated-text">${ht}</div>`;
+  }
+
+  // Resume prompt
+  document.getElementById('resPrompt').style.display=(verdict==='FAKE'||verdict==='SUSPICIOUS')?'block':'none';
+}
+
+// ════════════════════════════════════════════════════════
+//  CANVAS GAUGE
+// ════════════════════════════════════════════════════════
+function drawGauge(score, color, verdict) {
+  const canvas=document.getElementById('gaugeCanvas');
+  if(!canvas) return;
+  const ctx=canvas.getContext('2d');
+  const W=260, H=160, cx=130, cy=H-10, R=108, r2=78;
+  ctx.clearRect(0,0,W,H);
+
+  // Background arc
+  ctx.beginPath();
+  ctx.arc(cx,cy,R,Math.PI,2*Math.PI,false);
+  ctx.lineWidth=24; ctx.strokeStyle='#E4E2F5'; ctx.lineCap='round'; ctx.stroke();
+
+  // Colored progress arc
+  const startAngle=Math.PI;
+  const endAngle=Math.PI+(score/100)*Math.PI;
+  ctx.beginPath();
+  ctx.arc(cx,cy,R,startAngle,endAngle,false);
+  ctx.lineWidth=24; ctx.strokeStyle=color; ctx.lineCap='round'; ctx.stroke();
+
+  // Tick marks
+  for(let i=0;i<=10;i++){
+    const angle=Math.PI+(i/10)*Math.PI;
+    const x1=cx+(R+16)*Math.cos(angle), y1=cy+(R+16)*Math.sin(angle);
+    const x2=cx+(R+12)*Math.cos(angle), y2=cy+(R+12)*Math.sin(angle);
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2);
+    ctx.lineWidth=i%5===0?2:1; ctx.strokeStyle=i%5===0?'#7B72A8':'#CDC9EF'; ctx.stroke();
+  }
+
+  // Zone labels
+  ctx.font='bold 9px Outfit,sans-serif'; ctx.textAlign='center';
+  ctx.fillStyle='#059669'; ctx.fillText('SAFE',cx-R+8,cy+18);
+  ctx.fillStyle='#DC2626'; ctx.fillText('FAKE',cx+R-8,cy+18);
+
+  // Needle
+  const needleAngle=Math.PI+(score/100)*Math.PI;
+  const nx=cx+r2*Math.cos(needleAngle), ny=cy+r2*Math.sin(needleAngle);
+  ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(nx,ny);
+  ctx.lineWidth=3; ctx.strokeStyle=color; ctx.lineCap='round'; ctx.stroke();
+  ctx.beginPath(); ctx.arc(cx,cy,7,0,2*Math.PI);
+  ctx.fillStyle=color; ctx.fill();
+  ctx.beginPath(); ctx.arc(cx,cy,4,0,2*Math.PI);
+  ctx.fillStyle='#fff'; ctx.fill();
+
+  // Score text
+  const scoreEl=document.getElementById('gScore');
+  const verdEl=document.getElementById('gVerd');
+  scoreEl.style.color=color;
+  verdEl.style.color=color;
+
+  let cur=0;
+  const iv=setInterval(()=>{
+    cur+=2; scoreEl.textContent=Math.min(cur,score);
+    if(cur>=score){ clearInterval(iv); }
+  },16);
+
+  const vl={FAKE:'HIGH RISK',SUSPICIOUS:'SUSPICIOUS',LEGITIMATE:'LEGITIMATE'};
+  verdEl.textContent=vl[verdict]||verdict;
+}
+
+// ════════════════════════════════════════════════════════
+//  CANVAS RADAR CHART
+// ════════════════════════════════════════════════════════
+function drawRadar(data, labels, accentColor) {
+  const canvas=document.getElementById('radarCanvas');
+  if(!canvas) return;
+  const ctx=canvas.getContext('2d');
+  const W=240, H=240, cx=120, cy=120, R=80;
+  const n=data.length;
+  ctx.clearRect(0,0,W,H);
+
+  // Draw grid circles
+  for(let g=1;g<=4;g++){
+    ctx.beginPath();
+    for(let i=0;i<n;i++){
+      const a=(-Math.PI/2)+(i/n)*2*Math.PI;
+      const r=(g/4)*R;
+      const x=cx+r*Math.cos(a), y=cy+r*Math.sin(a);
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    }
+    ctx.closePath(); ctx.strokeStyle='#E4E2F5'; ctx.lineWidth=1; ctx.stroke();
+    if(g===4){ ctx.font='9px Outfit,sans-serif'; ctx.fillStyle='#7B72A8'; ctx.textAlign='left'; ctx.fillText('100',cx+2,cy-R+10); }
+  }
+
+  // Axes
+  for(let i=0;i<n;i++){
+    const a=(-Math.PI/2)+(i/n)*2*Math.PI;
+    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+R*Math.cos(a),cy+R*Math.sin(a));
+    ctx.strokeStyle='#CDC9EF'; ctx.lineWidth=1; ctx.stroke();
+  }
+
+  // Data polygon
+  ctx.beginPath();
+  for(let i=0;i<n;i++){
+    const a=(-Math.PI/2)+(i/n)*2*Math.PI;
+    const r=(data[i]/100)*R;
+    const x=cx+r*Math.cos(a), y=cy+r*Math.sin(a);
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  }
+  ctx.closePath();
+  ctx.fillStyle=accentColor+'25'; ctx.fill();
+  ctx.strokeStyle=accentColor; ctx.lineWidth=2; ctx.stroke();
+
+  // Data points
+  for(let i=0;i<n;i++){
+    const a=(-Math.PI/2)+(i/n)*2*Math.PI;
+    const r=(data[i]/100)*R;
+    ctx.beginPath(); ctx.arc(cx+r*Math.cos(a),cy+r*Math.sin(a),4,0,2*Math.PI);
+    ctx.fillStyle=accentColor; ctx.fill();
+    ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(cx+r*Math.cos(a),cy+r*Math.sin(a),2,0,2*Math.PI); ctx.fill();
+  }
+
+  // Labels
+  ctx.font='bold 9.5px Outfit,sans-serif'; ctx.fillStyle='#3D3660'; ctx.textAlign='center';
+  for(let i=0;i<n;i++){
+    const a=(-Math.PI/2)+(i/n)*2*Math.PI;
+    const lr=R+24;
+    const x=cx+lr*Math.cos(a), y=cy+lr*Math.sin(a);
+    const lines=labels[i].split('\n');
+    lines.forEach((l,li)=>ctx.fillText(l,x,y+li*11-(lines.length-1)*5));
+  }
+}
+
+function resetAnalyzer() {
+  document.getElementById('rph').style.display='block';
+  document.getElementById('rres').style.display='none';
+  document.getElementById('rld').style.display='none';
+  document.getElementById('aiLogCard').style.display='none';
+  document.getElementById('liveRiskRow').innerHTML='<span style="font-size:11px;color:var(--tx3);align-self:center">Start typing to see live signals...</span>';
+}
+
+// ════════════════════════════════════════════════════════
+//  HISTORY / DASHBOARD
+// ════════════════════════════════════════════════════════
+function getHist(){ return CU?JSON.parse(localStorage.getItem(uKey(CU.email))||'[]'):[]; }
+function saveHist(sc,vd,co,pr){
+  if(!CU) return;
+  let h=getHist();
+  h.unshift({sc,vd,co,pr,t:new Date().toLocaleString('en-IN',{dateStyle:'short',timeStyle:'short'})});
+  if(h.length>100) h.pop();
+  localStorage.setItem(uKey(CU.email),JSON.stringify(h));
+}
+function clearHist(){ if(!CU) return; if(!confirm('Clear all analysis history?')) return; localStorage.removeItem(uKey(CU.email)); renderDash(); toast('History cleared.','ok'); }
+function renderDash(){
+  const h=getHist(), tot=h.length, fk=h.filter(x=>x.vd==='FAKE').length, sf=h.filter(x=>x.vd==='LEGITIMATE').length;
+  const av=tot?Math.round(h.reduce((s,x)=>s+x.sc,0)/tot):0;
+  document.getElementById('dTot').textContent=tot;
+  document.getElementById('dFk').textContent=fk;
+  document.getElementById('dSf').textContent=sf;
+  document.getElementById('dAv').textContent=av;
+  const w=document.getElementById('histWrap');
+  if(!h.length){ w.innerHTML=`<div class="empty-st"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><p>No analyses yet — go to <strong>Job Analyzer</strong> to get started.</p></div>`; return; }
+  w.innerHTML=`<div style="overflow-x:auto"><table class="htable"><thead><tr><th>Time</th><th>Company</th><th>Preview</th><th>Score</th><th>Verdict</th></tr></thead><tbody>${h.map(x=>`<tr><td style="white-space:nowrap;font-size:11.5px">${x.t}</td><td style="font-weight:700;color:var(--tx)">${x.co}</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${x.pr}</td><td><span class="sbadge ${x.vd==='FAKE'?'f':x.vd==='SUSPICIOUS'?'s':'l'}">${x.sc}</span></td><td style="font-size:11.5px;font-weight:700;color:${x.vd==='FAKE'?'var(--red)':x.vd==='SUSPICIOUS'?'var(--amb)':'var(--grn)'}">${x.vd}</td></tr>`).join('')}</tbody></table></div>`;
+}
+
+// ════════════════════════════════════════════════════════
+//  SKILLS
+// ════════════════════════════════════════════════════════
+function addSkill(){ const i=document.getElementById('skInp'); const v=i.value.trim(); if(!v||skills.includes(v)) return; skills.push(v); i.value=''; renderSkills(); }
+function removeSkill(s){ skills=skills.filter(x=>x!==s); renderSkills(); }
+function renderSkills(){ document.getElementById('skillTagWrap').innerHTML=skills.map(s=>`<span class="skill-tag">${s}<span class="skill-rm" onclick="removeSkill('${s}')">×</span></span>`).join(''); }
+
+// ════════════════════════════════════════════════════════
+//  GEMINI RESUME ANALYSIS
+// ════════════════════════════════════════════════════════
+async function runResume() {
+  if(!GK){ toast('Connect your Gemini API key in the top banner first.','err'); return; }
+  const rt=document.getElementById('rTxt').value.trim();
+  const role=document.getElementById('rRole').value.trim();
+  if(!rt){ toast('Please paste your resume text.','err'); return; }
+  if(!role){ toast('Please enter your target job role.','err'); return; }
+  const jd=document.getElementById('rJD').value.trim();
+
+  document.getElementById('resumeBtn').disabled=true;
+  document.getElementById('rph2').style.display='none';
+  document.getElementById('rout').style.display='none';
+  document.getElementById('rld2').style.display='block';
+
+  const prompt=`You are a senior HR professional and ATS (Applicant Tracking System) expert with 15 years experience in the Indian job market. Analyze this resume with depth and honesty.
+
+TARGET ROLE: ${role}
+SKILLS LISTED SEPARATELY: ${skills.length?skills.join(', '):'None specified'}
+${jd?`TARGET JOB DESCRIPTION:\n"""\n${jd.substring(0, 1500)}\n"""`:''} 
+
+RESUME:
+"""
+${rt.substring(0, 3000)}
+"""
+
+Provide thorough, specific, actionable feedback. Be honest — do not be overly positive. Identify real weaknesses.
+
+Respond ONLY in this JSON (no markdown):
+{
+  "overall_score": <0-100>,
+  "ats_score": <0-100>,
+  "grade": "A" or "B" or "C" or "D" or "F",
+  "summary": "<2-3 sentences honest overall assessment>",
+  "impact_statement": "<one line — the single most important issue or strength>",
+  "sections": {
+    "contact": { "score": <0-100>, "issues": ["<issue1>","<issue2>"], "positives": ["<positive1>"] },
+    "summary_obj": { "score": <0-100>, "issues": ["<issue1>","<issue2>"], "positives": ["<positive1>"] },
+    "experience": { "score": <0-100>, "issues": ["<issue1>","<issue2>","<issue3>"], "positives": ["<positive1>"] },
+    "education": { "score": <0-100>, "issues": ["<issue1>"], "positives": ["<positive1>"] },
+    "skills": { "score": <0-100>, "issues": ["<issue1>","<issue2>"], "positives": ["<positive1>"] },
+    "formatting": { "score": <0-100>, "issues": ["<issue1>"], "positives": ["<positive1>"] }
+  },
+  "missing_keywords": ["<kw1>","<kw2>","<kw3>","<kw4>","<kw5>","<kw6>"],
+  "strong_keywords": ["<kw1>","<kw2>","<kw3>"],
+  "quantification_score": <0-100>,
+  "action_verb_score": <0-100>,
+  "critical_fixes": ["<most important fix>","<second fix>","<third fix>"],
+  "quick_wins": ["<easy fix 1>","<easy fix 2>","<easy fix 3>"],
+  "rewritten_summary": "<Write a completely new, ATS-optimized, 4-5 sentence professional summary for this candidate targeting ${role}. Use strong action verbs, include specific skills, quantify where possible, and match keywords from the job description if provided. Make it significantly better than the original.>",
+  "improved_skills_section": "<Rewrite the skills section as a clean, ATS-friendly list of 10-14 technical and soft skills most relevant for ${role}>",
+  "top_advice": "<The single most impactful change this specific candidate should make>"
+}`;
+
+  try {
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GK}`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.2,maxOutputTokens:2200}})
+    });
+    if(!res.ok){ 
+      const errText = await res.text();
+      toast(`API Error: ${res.status} - ${errText.substring(0, 100)}`, 'err');
+      throw new Error('HTTP '+res.status); 
+    }
+    const data=await res.json();
+    const raw=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
+    const cleaned=raw.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();
+    const r=JSON.parse(cleaned);
+    renderResume(r);
+  } catch(e) {
+    console.error('Resume analysis error:', e);
+    document.getElementById('rld2').style.display='none';
+    document.getElementById('rph2').style.display='block';
+    toast('Analysis failed. Check API key or network connection.','err');
+  }
+  document.getElementById('resumeBtn').disabled=false;
+}
+
+function renderResume(r) {
+  document.getElementById('rld2').style.display='none';
+  const el=document.getElementById('rout');
+  el.style.display='block';
+  const gc=r.overall_score>=75?'var(--grn)':r.overall_score>=50?'var(--amb)':'var(--red)';
+  const sp=s=>s>=70?'h':s>=45?'m':'l';
+  const sico=(k)=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13">${k}</svg>`;
+
+  const secHTML=(title,ico,sec)=>`
+    <div class="card" style="margin-bottom:12px;border-left:3px solid var(--p3)">
+      <div class="sec-score">
+        <div class="sec-title">${sico(ico)} ${title}</div>
+        <span class="spill ${sp(sec.score)}">${sec.score}/100</span>
+      </div>
+      ${(sec.positives||[]).map(p=>`<div class="fb" style="color:var(--grn)">${sico('<polyline points="20 6 9 17 4 12"/>')} ${p}</div>`).join('')}
+      ${(sec.issues||[]).map(i=>`<div class="fb" style="color:var(--tx2)">${sico('<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>')} ${i}</div>`).join('')}
+    </div>`;
+
+  el.innerHTML=`
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;flex-wrap:wrap">
+      <div style="width:68px;height:68px;border-radius:50%;background:${gc};color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0">
+        <div style="font-size:22px;font-weight:800;font-family:var(--mono);line-height:1">${r.overall_score}</div>
+        <div style="font-size:9px;opacity:.8">/100</div>
+      </div>
+      <div>
+        <div style="font-size:16px;font-weight:800;color:var(--tx)">Grade ${r.grade} — ATS Score: ${r.ats_score}/100</div>
+        <div style="font-size:12px;color:var(--tx3);margin-top:2px">${r.summary}</div>
+        <div style="font-size:12px;font-weight:700;color:${gc};margin-top:4px">${r.impact_statement}</div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+      <div style="background:var(--bg2);border-radius:8px;padding:8px 12px;text-align:center;flex:1;min-width:80px">
+        <div style="font-size:9px;font-weight:800;color:var(--tx3);letter-spacing:.06em;text-transform:uppercase">Quantification</div>
+        <div style="font-size:20px;font-weight:800;font-family:var(--mono);color:${r.quantification_score>=60?'var(--grn)':'var(--red)'}">${r.quantification_score}</div>
+      </div>
+      <div style="background:var(--bg2);border-radius:8px;padding:8px 12px;text-align:center;flex:1;min-width:80px">
+        <div style="font-size:9px;font-weight:800;color:var(--tx3);letter-spacing:.06em;text-transform:uppercase">Action Verbs</div>
+        <div style="font-size:20px;font-weight:800;font-family:var(--mono);color:${r.action_verb_score>=60?'var(--grn)':'var(--red)'}">${r.action_verb_score}</div>
+      </div>
+      <div style="background:var(--bg2);border-radius:8px;padding:8px 12px;text-align:center;flex:1;min-width:80px">
+        <div style="font-size:9px;font-weight:800;color:var(--tx3);letter-spacing:.06em;text-transform:uppercase">Missing Keywords</div>
+        <div style="font-size:20px;font-weight:800;font-family:var(--mono);color:var(--red)">${(r.missing_keywords||[]).length}</div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:14px">
+      <div style="font-size:10px;font-weight:800;color:var(--tx3);letter-spacing:.07em;text-transform:uppercase;margin-bottom:6px">Missing Keywords (Add to Resume)</div>
+      <div>${(r.missing_keywords||[]).map(k=>`<span class="kw-miss">${k}</span>`).join('')}</div>
+      <div style="font-size:10px;font-weight:800;color:var(--tx3);letter-spacing:.07em;text-transform:uppercase;margin:8px 0 6px">Strong Keywords (Keep These)</div>
+      <div>${(r.strong_keywords||[]).map(k=>`<span class="kw-ok">${k}</span>`).join('')}</div>
+    </div>
+
+    ${secHTML('Contact Information','<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',r.sections.contact)}
+    ${secHTML('Professional Summary','<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>',r.sections.summary_obj)}
+    ${secHTML('Work Experience','<rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',r.sections.experience)}
+    ${secHTML('Education','<path d="M22 10v6M2 10l10-5 10 5-10 5z"/>',r.sections.education)}
+    ${secHTML('Skills Section','<circle cx="12" cy="12" r="10"/>',r.sections.skills)}
+    ${secHTML('Formatting & Structure','<rect x="3" y="3" width="18" height="18" rx="2"/>',r.sections.formatting)}
+
+    <div class="card" style="margin-bottom:12px;border-left:3px solid var(--red)">
+      <div style="font-size:12px;font-weight:800;color:var(--tx);margin-bottom:8px">Critical Fixes (Do These First)</div>
+      ${(r.critical_fixes||[]).map((f,i)=>`<div class="fb"><span style="width:18px;height:18px;background:var(--red);color:#fff;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:700;flex-shrink:0">${i+1}</span>${f}</div>`).join('')}
+    </div>
+
+    <div class="card" style="margin-bottom:12px;border-left:3px solid var(--grn)">
+      <div style="font-size:12px;font-weight:800;color:var(--tx);margin-bottom:8px">Quick Wins (Easy Improvements)</div>
+      ${(r.quick_wins||[]).map(f=>`<div class="fb" style="color:var(--grn)">${sico('<polyline points="20 6 9 17 4 12"/>')} ${f}</div>`).join('')}
+    </div>
+
+    <div class="card" style="margin-bottom:12px;border-left:3px solid var(--p2)">
+      <div style="font-size:12px;font-weight:800;color:var(--tx);margin-bottom:8px">AI-Rewritten Professional Summary</div>
+      <div class="rewrite-box">${r.rewritten_summary}</div>
+    </div>
+
+    <div class="card" style="margin-bottom:12px;border-left:3px solid var(--p2)">
+      <div style="font-size:12px;font-weight:800;color:var(--tx);margin-bottom:8px">Improved Skills Section</div>
+      <div class="rewrite-box">${r.improved_skills_section}</div>
+    </div>
+
+    <div style="background:var(--pl);border:1.5px solid var(--p3);border-radius:var(--r);padding:12px 14px">
+      <div style="font-size:10px;font-weight:800;color:var(--p2);letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px">Top Advice from AI</div>
+      <div style="font-size:13px;color:var(--pd);font-weight:600;line-height:1.6">${r.top_advice}</div>
+    </div>`;
+}
+
+// ════════════════════════════════════════════════════════
+//  TOAST
+// ════════════════════════════════════════════════════════
+function toast(msg,type='ok'){
+  const t=document.getElementById('toast'), m=document.getElementById('toastMsg');
+  t.className='toast '+(type==='ok'?'ok':'err');
+  m.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3200);
+}
+</script>
+</body>
+</html>
